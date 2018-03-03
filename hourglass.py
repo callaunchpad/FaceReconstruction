@@ -13,7 +13,7 @@ Input
 Output
     An untrained hourglass network
 '''
-def get_hourglass(layer_details, pool_details, residual_module):
+def get_hourglass(features, layer_details, pool_details, residual_module):
     #our input is 200x200, a regular 2D image
     input_layer = tf.reshape(features["x"], [-1, 200, 200, 1])
 
@@ -27,15 +27,16 @@ def get_hourglass(layer_details, pool_details, residual_module):
             kernel_size=[kernel_dim1, kernel_dim2],
             padding=padding,
             activation=activation)
-        new_pool = tf.layers.max_pooling2d(inputs=new_conv_layer, pool_size=[pool_dim1, pool_dim2], stride=stride)
+        new_pool = tf.layers.max_pooling2d(inputs=new_conv_layer, pool_size=[pool_dim1, pool_dim2], strides=stride)
         #Each layer's size is dependent on their poolsize, and so we save these for upsampling later
         upsample_sizes.append(tf.size(new_pool))
         layers.append(new_conv_layer)
         layers.append(new_pool)
 
     #upsample time!
-    for i, layer_size in enumerate(reversed(upsample_sizes[:-1]))
+    for i, layer_size in enumerate(reversed(upsample_sizes[:-1])):
         #upsample by nearest neighbor
+        print(tf.shape(layers[-1]))
         new_upsample_layer = tf.image.resize_nearest_neighbor(layers[-1],size=layer_size)
         #add residual layer
         residual_layer = residual_module(layers[-1*(3*i+1)])
@@ -60,16 +61,16 @@ def get_kernel_size(layer_in, layer_out, padding="none"):
 
 def hourglass_model_fn(features, labels, mode):
     layers = [(200, 200), (125, 125), (75, 75), (25, 25), (4, 4)]
-    kernels = [get_kernel_size(layers[i], layers[i+1]) for i in range(len(layers-1))]
-    filters = [10 for i in range(len(layers-1))]
-    padding = ["same" for i in range(len(layers-1))]
-    activation = [tf.nn.relu for i in range(len(layers-1))]
+    kernels = [get_kernel_size(layers[i], layers[i+1]) for i in range(len(layers)-1)]
+    filters = [10 for i in range(len(layers)-1)]
+    padding = ["same" for i in range(len(layers)-1)]
+    activation = [tf.nn.relu for i in range(len(layers)-1)]
 
-    layer_details = [(kernels[i][0], kernels[i][1], filters[i], padding[i], activation[i]) for i in range(len(layers-1))]
+    layer_details = [(kernels[i][0], kernels[i][1], filters[i], padding[i], activation[i]) for i in range(len(layers)-1)]
     residual_model = lambda x : x
-    pool_details = [(1, 1, 1) for i in range(len(layers-1))]
+    pool_details = [(1, 1, 1) for i in range(len(layers)-1)]
 
-    hourglass_model = get_hourglass(layer_details, pool_details, residual_model)
+    hourglass_model = get_hourglass(features, layer_details, pool_details, residual_model)
     
     if mode == tf.estimator.ModeKeys.PREDICT:
         return hourglass_model
@@ -83,15 +84,25 @@ def hourglass_model_fn(features, labels, mode):
     eval_metric_ops = {"accuracy": tf.metrics.accuracy(labels=labels, predictions=hourglass_model)}
     return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
+#given a path for saving progress for our model, training and label data, returns trained model.
+#this is where most of the training will take effect
+def train_model(path, train_data, train_labels):
+    facelift = tf.estimator.Estimator(model_fn=hourglass_model_fn, model_dir=path)
+    train_input_fn = tf.estimator.inputs.numpy_input_fn(x={"x": train_data},
+        y=train_labels,
+        batch_size=100,
+        num_epochs=None,
+        shuffle=True)
+    facelift.train(input_fn=train_input_fn, steps=20000)
+    return facelift
 
-model_path = ""
-facelift = tf.estimator.Estimator(model_fn=hourglass_model_fn, model_dir=path)
-train_input_fn = tf.estimator.inputs.numpy_input_fn(x={"x": train_data},
-    y=train_labels,
-    batch_size=100,
-    num_epochs=None,
-    shuffle=True)
-facelift.train(input_fn=train_input_fn, steps=20000)
+
+train_data = np.array([np.random.rand(200, 200) for i in range(1000)]).astype('float32')
+train_labels = np.array([np.random.rand(200, 200) for i in range(1000)]).astype('float32')
+model_path = "hourglass_util/"
+
+train_model(model_path, train_data, train_labels)
+
 
 
 
