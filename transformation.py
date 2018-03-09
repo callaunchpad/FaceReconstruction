@@ -1,6 +1,9 @@
 import numpy as np
-
-def transform(x,y,z,rotation_matrix, translation_x=0, translation_y=0, translation_z=0):
+#
+# Input x,y,z for point we are manipulating. Choose rotation axis from bottom 3 Functions.
+# Put translation in X, Y, Z directions.
+#
+def transform(x,y,z,rotation_matrix=rotate_x_axis(np.pi/2), translation_x=0, translation_y=0, translation_z=0):
     translation = np.array([[translation_x], [translation_y], [translation_z]])
     matrix = np.hstack((rotation_matrix,translation))
     matrix = np.vstack((matrix, [0,0,0,1]))
