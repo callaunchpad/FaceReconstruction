@@ -18,13 +18,12 @@ def load_3D_labels(landmark_path, mesh_path):
         np.ones(vertices3D[1].shape)
     return vertices3D
 
-# Takes in vertices hortizontally stacked, a linear_transformation_matrix, and translation coordinations as a column vector (3x1)
-# Applies the translation and then the transformation
-
+# Takes in vertices as a column vector, a linear_transformation_matrix [A], and translation coordinations as a column vector [b] (3x1)
+# Applies transformation Ax + b
 
 def affine_transform(vertices, linear_transform, translation):
-    vertices = vertices + translation
     vertices = linear_transform.dot(vertices)
+    vertices += translation
     return vertices
 
 
@@ -41,16 +40,15 @@ def crop_vertices(vertices, width, height):
         vertices[1, :] >= 0, vertices[1, :] <= height)].T
     return vertices
 
-# Takes path to the landmark file, mesh file, a linear_transformation_matrix,
-# and translation coordinations as a column vector (3x1), bounding width, bounding height, output filename
+# Takes path to the landmark file, mesh file, a linear_transformation_matrix [A],
+# and translation coordinations as a column vector [b] (3x1), bounding width, bounding height, output path
 
-
-def process_3D_labels(landmark_path, mesh_path, linear_transform, translation, width, height, file_name):
+def process_3D_labels(landmark_path, mesh_path, linear_transform, translation, width, height, out_path):
     vertices = load_3D_labels(landmark_path, mesh_path)
     vertices = affine_transform(vertices, linear_transform, translation)
     vertices = crop_vertices(vertices, width, height)
     vertices_dic = {'3D-vertices': vertices}
-    scio.savemat(file_name, vertices_dic)
+    scio.savemat(out_path, vertices_dic)
 
 
 # vertices = load_3D_labels(
