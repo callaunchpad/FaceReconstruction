@@ -13,7 +13,7 @@ from scipy.io import savemat
 from load_labels import process_3D_labels, load_3D_labels
 
 
-"""Preprocessing script for faces and mesh data.
+"""Preprocessing script for faces and 3D mesh data.
 
 Script iterates through images in the 300W-3D dataset and
 performs the following:
