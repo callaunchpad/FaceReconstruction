@@ -2,3 +2,6 @@
 300W_LP/
 300W-3D/
 300W-3D-Face/
+*._DS_Store
+.DS_Store
+*__pycache__/
