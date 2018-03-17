@@ -2,8 +2,8 @@ import os
 import cv2
 import scipy.io as scio
 
-def enumerate_data_paths():
-    data_dir = os.getcwd() + '/300W_LP'
+def enumerate_data_paths(root='preprocessed/'):
+    data_dir = os.getcwd() + root
     for root, dirs, files in os.walk(data_dir):
         if 'Code' in root or 'landmarks' in root:
             continue

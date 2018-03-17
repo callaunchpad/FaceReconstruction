@@ -2,6 +2,22 @@
 300W_LP/
 300W-3D/
 300W-3D-Face/
-*._DS_Store
+preprocessed/
+
+
+# General
 .DS_Store
-*__pycache__/
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+
+# Thumbnails
+._*
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
