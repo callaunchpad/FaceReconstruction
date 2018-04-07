@@ -119,13 +119,13 @@ def cropFace(face_path, dimensions):
 ############################
 
 # Create cropped image folders
-crop_folder = data_path + 'cropped/'
+crop_folder = './preprocessed/'
 for subset in subsets:
     if not os.path.exists(crop_folder + subset):
         os.makedirs(crop_folder + subset)
 
 # Create processed mesh folders
-mesh_out_folder = './300W-3D-Face/processed/'
+mesh_out_folder = './preprocessed/'
 for subset in subsets:
     if not os.path.exists(mesh_out_folder + subset):
         os.makedirs(mesh_out_folder + subset)
