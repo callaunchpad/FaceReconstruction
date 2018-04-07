@@ -11,7 +11,6 @@ HELEN_size = 2253
 IBUG_size = 105
 LFPW_size = 996
 
-
 # Image paths
 data_path = './300W-3D/'
 subsets = ['AFW', 'HELEN', 'IBUG', 'LFPW']
@@ -78,8 +77,4 @@ def get_batch(size):
         vertices.append(vert)
         voxels.append(vox)
 
-
     return (vertices, voxels)
-
-
-get_batch(10)
