@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import tensorflow.contrib.slim as slim
 import sklearn
+from manager import get_batch
 
 '''
 RESBLOCK BOIZ
@@ -106,7 +107,7 @@ def get_layer_size(layer_in, kernel, padding="none"):
 
 #given a path for saving progress for our model, training and label data, returns trained model.
 #this is where most of the training will take effect
-def train_model(path, train_data, train_labels):
+def train_model(path, train_data, train_labels, batch_size, iterations):
     layers = [(200, 200, 3), (125, 125, 3), (50, 50, 3), (4, 4, 3)]
     kernels = [(4, 4, 3), (4, 4, 3), (4, 4, 3)]
     filters = [3 for i in range(len(layers)-1)]
@@ -128,9 +129,9 @@ def train_model(path, train_data, train_labels):
     
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        for i in range(1):
+        for i in range(iterations):
             print("iteration ", i)
-            batch = (train_data, train_labels)
+            batch = get_batch(batch_size)
             train_step.run(feed_dict = {input: batch[0], labels: batch[1]})
     
     return hourglass_model
@@ -141,4 +142,4 @@ train_labels = np.array([np.random.rand(200, 200, 200) for i in range(2)]).astyp
 model_path = "hourglass_util/"
 
 
-train_model(model_path, train_data, train_labels)
+train_model(model_path, train_data, train_labels, batch_size=100, iterations=1000)
