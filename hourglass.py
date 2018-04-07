@@ -1,6 +1,17 @@
 import tensorflow as tf
 import numpy as np
+import tensorflow.contrib.slim as slim
 import sklearn
+
+'''
+RESBLOCK BOIZ
+'''
+def resBlock(x,channels=3,kernel_size=[3,3],scale=1):
+    tmp = slim.conv2d(x,channels,kernel_size,activation_fn=None)
+    tmp = tf.nn.relu(tmp)
+    tmp = slim.conv2d(tmp,channels,kernel_size,activation_fn=None)
+    tmp *= scale
+    return x + tmp
 
 '''
 Our input layer is 200x200, and the smallest we get to is 4x4
@@ -15,8 +26,8 @@ Output
 '''
 def get_hourglass(features, layer_details, pool_details, residual_module):
     #our input is 200x200, a regular 2D image
-    print(features["x"].shape)
-    input_layer = tf.reshape(features["x"], [-1, 200, 200, 3])
+    print(features.shape)
+    input_layer = tf.reshape(features, [-1, 200, 200, 3])
     #construct the first half of our downsampling convolutional layers, going off of layer_details and pool_details
     conv_layers = [input_layer]
     # conv_input_shapes = [input_layer.get_shape()]
@@ -93,49 +104,41 @@ def get_layer_size(layer_in, kernel, padding="none"):
     if padding == "none":
         return (layer_in[0]-kernel[0]+1,layer_in[1]-kernel[1]+1,layer_in[2]-kernel[2]+1)
 
-def hourglass_model_fn(features, labels, mode):
-    #layers = [(200-40*i, 200-40*i) for i in range(5)]
-    #kernels = [get_kernel_size(layers[i], layers[i+1]) for i in range(len(layers)-1)]
-    #filters = [1 for i in range(len(layers)-1)]
+#given a path for saving progress for our model, training and label data, returns trained model.
+#this is where most of the training will take effect
+def train_model(path, train_data, train_labels):
     layers = [(200, 200, 3), (125, 125, 3), (50, 50, 3), (4, 4, 3)]
     kernels = [(4, 4, 3), (4, 4, 3), (4, 4, 3)]
     filters = [3 for i in range(len(layers)-1)]
     padding = ["valid" for i in range(len(layers)-1)]
     activation = [tf.nn.relu for i in range(len(layers)-1)]
-
+    
     layer_details = [(kernels[i][0], kernels[i][1], kernels[i][2], filters[i], padding[i], activation[i]) for i in range(len(layers)-1)]
-    residual_model = lambda x : x
+    #residual_model = lambda x : x
+    residual_model = resBlock
     pool_details = [(73, 73, 1, 1), (73, 73, 1, 1), (44, 44, 1, 1)]
+    
+    input = tf.placeholder(tf.float32, name="input", shape=(None, 200, 200, 3))
+    labels = tf.placeholder(tf.float32, name="labels", shape=(None, 200, 200, 200))
 
-    hourglass_model = get_hourglass(features, layer_details, pool_details, residual_model)
-
-    if mode == tf.estimator.ModeKeys.PREDICT:
-        return hourglass_model
-
-    labels = tf.reshape(labels, [-1, 200, 200, 200])
+    hourglass_model = get_hourglass(input, layer_details, pool_details, residual_model)
+    
     loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=hourglass_model, labels=labels), name= 'cross_entropy_loss')
-    if mode == tf.estimator.ModeKeys.TRAIN:
-        optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
-        train_op = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
-        return tf.estimator.EstimatorSpec(mode=tf.estimator.ModeKeys.TRAIN, loss=loss, train_op=train_op)
-
-    eval_metric_ops = {"accuracy": tf.metrics.accuracy(labels=labels, predictions=hourglass_model)}
-    return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
-
-#given a path for saving progress for our model, training and label data, returns trained model.
-#this is where most of the training will take effect
-def train_model(path, train_data, train_labels):
-    facelift = tf.estimator.Estimator(model_fn=hourglass_model_fn, model_dir=path)
-    train_input_fn = tf.estimator.inputs.numpy_input_fn(x={"x": train_data},
-        y=train_labels,
-        batch_size=2,
-        num_epochs=None,
-        shuffle=True)
-    facelift.train(input_fn=train_input_fn, steps=20000)
-    return facelift
+    train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)
+    
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        for i in range(1):
+            print("iteration ", i)
+            batch = (train_data, train_labels)
+            train_step.run(feed_dict = {input: batch[0], labels: batch[1]})
+    
+    return hourglass_model
 
 
 train_data = np.array([np.random.rand(200, 200, 3) for i in range(2)]).astype('float32')
 train_labels = np.array([np.random.rand(200, 200, 200) for i in range(2)]).astype('float32')
 model_path = "hourglass_util/"
+
+
 train_model(model_path, train_data, train_labels)

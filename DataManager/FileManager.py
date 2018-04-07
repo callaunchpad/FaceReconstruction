@@ -15,6 +15,9 @@ def enumerate_data_paths(root='preprocessed/'):
 def get_datum(path):
     pic_path = path + '.jpg'
     vertex_path = path + '.mat'
-    pic = cv2.imread(pic_path)
-    vertices = scio.loadmat(vertex_path)['pt2d']
-    return pic, vertices
+    try:
+        pic = cv2.imread(pic_path)
+        vertices = scio.loadmat(vertex_path)['pt2d']
+        return pic, vertices
+    except:
+        return [], []
