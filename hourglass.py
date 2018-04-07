@@ -1,6 +1,17 @@
 import tensorflow as tf
 import numpy as np
+import tensorflow.contrib.slim as slim
 import sklearn
+
+'''
+RESBLOCK BOIZ
+'''
+def resBlock(x,channels=3,kernel_size=[3,3],scale=1):
+    tmp = slim.conv2d(x,channels,kernel_size,activation_fn=None)
+    tmp = tf.nn.relu(tmp)
+    tmp = slim.conv2d(tmp,channels,kernel_size,activation_fn=None)
+    tmp *= scale
+    return x + tmp
 
 '''
 Our input layer is 200x200, and the smallest we get to is 4x4
@@ -104,7 +115,8 @@ def hourglass_model_fn(features, labels, mode):
     activation = [tf.nn.relu for i in range(len(layers)-1)]
 
     layer_details = [(kernels[i][0], kernels[i][1], kernels[i][2], filters[i], padding[i], activation[i]) for i in range(len(layers)-1)]
-    residual_model = lambda x : x
+    #residual_model = lambda x : x
+    residual_model = resBlock
     pool_details = [(73, 73, 1, 1), (73, 73, 1, 1), (44, 44, 1, 1)]
 
     hourglass_model = get_hourglass(features, layer_details, pool_details, residual_model)
@@ -131,7 +143,7 @@ def train_model(path, train_data, train_labels):
         batch_size=2,
         num_epochs=None,
         shuffle=True)
-    facelift.train(input_fn=train_input_fn, steps=20000)
+    facelift.train(input_fn=train_input_fn, steps=1)
     return facelift
 
 
