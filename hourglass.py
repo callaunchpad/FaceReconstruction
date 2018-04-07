@@ -120,6 +120,8 @@ def train_model(path, train_data, train_labels):
 train_data = np.array([np.random.rand(200, 200, 3) for i in range(10)]).astype('float32')
 train_labels = np.array([np.random.rand(200, 200, 200) for i in range(10)]).astype('float32')
 model_path = "hourglass_util/"
+
+
 train_model(model_path, train_data, train_labels)
 
 
