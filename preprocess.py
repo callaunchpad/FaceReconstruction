@@ -18,10 +18,10 @@ from load_labels import process_3D_labels, load_3D_labels
 Script iterates through images in the 300W-3D dataset and
 performs the following:
 
-1.  Detects the face in each image and crops it to contain 
+1.  Detects the face in each image and crops it to contain
     only the face.
 2.  Resizes and upsamples the image to (200, 200).
-3.  Transforms and crops the associated 3D mesh to align 
+3.  Transforms and crops the associated 3D mesh to align
     with the cropped image.
 
 You should have the 300W-3D and 300W-3D-Face datasets in
@@ -48,7 +48,7 @@ cnn_face_detector = dlib.cnn_face_detection_model_v1(cnn_path)
 data_path = './300W-3D/'
 subsets = ['AFW', 'HELEN', 'IBUG', 'LFPW']
 
-# Set to True if you want to show show cropped images 
+# Set to True if you want to show show cropped images
 # and plot transformed meshes afterwards
 show_examples = True
 
@@ -92,7 +92,7 @@ def getBounding(face_path, use_cnn = False):
     for k, d in enumerate(dets):
 
         shape = predictor(img, d.rect) if use_cnn else predictor(img, d)
-        
+
         x_min = y_min = float('inf')
         x_max = y_max = -float('inf')
         for i in shape.parts():
@@ -101,7 +101,7 @@ def getBounding(face_path, use_cnn = False):
             x_min = min(i.x, x_min)
             y_min = min(i.y, y_min)
         return (x_max, y_max, x_min, y_min)
-    
+
 def saveFace(output_path, pil_img):
     pil_img.save(output_path)
 
@@ -130,29 +130,33 @@ for subset in subsets:
     if not os.path.exists(mesh_out_folder + subset):
         os.makedirs(mesh_out_folder + subset)
 
+
 for subset in subsets:
     mypath = data_path + subset + '/'
     filepaths = [f for f in listdir(mypath) if isfile(join(mypath, f)) and f[-4:] == '.jpg']
-    
+
     for i in range(len(filepaths)):
+    # for i in range(1):
         f = filepaths[i]
         face_path = data_path + subset + '/' + f
         landmark_path = face_path[:-4] + '.mat'
         mesh_path = './300W-3D-Face/' + subset + '/' + f[:-4] + '.mat'
         mesh_out_path = mesh_out_folder + subset + '/' + f[:-4] + '.mat'
         cropped_path = crop_folder + subset + '/' + f
-        
+
+        # print("Min: {}  Max: {}".format(min(z), max(z)))
         dimensions = getBounding(face_path)
         if dimensions:
             cropped_img = cropFace(face_path, dimensions)
             transform = getTransform(dimensions)
-            
-            process_3D_labels(landmark_path, mesh_path, transform['A'], transform['b'], 200, 200, mesh_out_path)
-            
-            saveFace(cropped_path, cropped_img)
 
+            process_3D_labels(landmark_path, mesh_path, transform['A'], transform['b'], 200, 200, mesh_out_path)
+
+            saveFace(cropped_path, cropped_img)
+        #
         if not i % 50:
             print("Processing " + subset + " image {} of {}".format(i, len(filepaths)))
+
 
 
 
@@ -176,7 +180,6 @@ if show_examples:
 
         plt.figure()
         plt.imshow(img)
-        plt.plot(subsample(vertices[0], 30), subsample(vertices[1], 30), 'g.')            
-        
-    plt.show()
+        plt.plot(subsample(vertices[0], 30), subsample(vertices[1], 30), 'g.')
 
+    plt.show()

@@ -1,6 +1,6 @@
-import scipy.io as scio
-import numpy as np
 import sys
+import numpy as np
+import scipy.io as scio
 sys.path.insert(0, 'DataManager')
 fm = __import__('3D-Face-FileManager')
 
@@ -26,7 +26,6 @@ def affine_transform(vertices, linear_transform, translation):
     vertices += translation
     return vertices
 
-
 def crop_vertices(vertices, width, height):
     # result = []
     # for item in vertices.T:
@@ -47,13 +46,6 @@ def process_3D_labels(landmark_path, mesh_path, linear_transform, translation, w
     vertices = load_3D_labels(landmark_path, mesh_path)
     vertices = affine_transform(vertices, linear_transform, translation)
     vertices = crop_vertices(vertices, width, height)
-    vertices_dic = {'3D-vertices': vertices}
-    scio.savemat(out_path, vertices_dic)
-
-
-# vertices = load_3D_labels(
-#     'D:\\Users\\willf\\Desktop\\Launchpad\\FaceReconstruction\\300W-3D\\HELEN\\232194_1.mat', 'D:\\Users\\willf\\Desktop\\Launchpad\\FaceReconstruction\\300W-3D-Face\\HELEN\\232194_1.mat')
-# vertices = crop_vertices(vertices, 350, 350)
-# fm.plot_vertices(vertices[:, ::20])
-# process_3D_labels('D:\\Users\\willf\\Desktop\\Launchpad\\FaceReconstruction\\300W-3D\\HELEN\\232194_1.mat',
-#                   'D:\\Users\\willf\\Desktop\\Launchpad\\FaceReconstruction\\300W-3D-Face\\HELEN\\232194_1.mat', np.eye(3), 0, 300, 300, 'output')
+    if vertices.size:
+        vertices_dic = {'3D-vertices': vertices}
+        scio.savemat(out_path, vertices_dic)

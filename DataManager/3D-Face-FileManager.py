@@ -33,7 +33,6 @@ def get_datum(paths):
 
 # plots vertices
 
-
 def plot_vertices(vertices):
     fig = plt.figure()
     ax = plt.axes(projection='3d')
@@ -46,15 +45,3 @@ def plot_vertices(vertices):
     ax.set_zlabel('z')
     ax.scatter3D(xdata, ydata, zdata, c=zdata, cmap='Greens')
     plt.show()
-
-
-# print([min(get_datum(paths)[1][0]) for paths in list(enumerate_data_paths())[:10]])
-# data = ('D:\\Users\\willf\\Desktop\\Launchpad\\FaceReconstruction\\300W-3D-Face\\AFW\\1372188757_1_0.jpg',
-#         'D:\\Users\\willf\\Desktop\\Launchpad\\FaceReconstruction\\300W-3D-Face\\AFW\\1372188757_1.mat')
-# print(data)
-# vertices = get_datum(data)[1]
-# print(max(vertices[1]) - min(vertices[1]))
-# print(np.mean(vertices[0]))
-# print(np.mean(vertices[1]))
-# print(np.mean(vertices[2]))
-# plot_vertices(vertices[:, ::20])
