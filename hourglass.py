@@ -27,7 +27,6 @@ Output
 '''
 def get_hourglass(features, layer_details, pool_details, residual_module):
     #our input is 200x200, a regular 2D image
-    print(features.shape)
     input_layer = tf.reshape(features, [-1, 200, 200, 3])
     #construct the first half of our downsampling convolutional layers, going off of layer_details and pool_details
     conv_layers = [input_layer]
@@ -61,7 +60,6 @@ def get_hourglass(features, layer_details, pool_details, residual_module):
         #upsample by nearest neighbor
         # print(last_layer.shape)
         corresponding_layer = conv_layers[-(i+2)]
-        print(corresponding_layer)
 
         upsampled_size = corresponding_layer.shape[1:3]
 
@@ -84,7 +82,6 @@ def get_hourglass(features, layer_details, pool_details, residual_module):
         kernel_size=[1,1],
         activation=None)
     # new_conv_layer = tf.reshape(new_conv_layer, [-1, 200, 200, 200])
-    print(new_conv_layer.shape)
     last_layer = new_conv_layer
     #return our last layer, the output
     return last_layer
