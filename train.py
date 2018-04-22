@@ -30,9 +30,10 @@ def train_model(path, train_data, train_labels, batch_size, iterations, load=Fal
         for i in range(iterations):
             print("Iteration %i" % i)
             images, voxels = get_batch(batch_size)
-            train_step.run(feed_dict = {input: images, labels: voxels})
+            err = train_step.run(loss, feed_dict = {input: images, labels: voxels})
             #save our sess every 100 iterations
             if (i % 100 == 0):
+                print("Error": , err)
                 saver.save(sess, 'hourglass_model_sess')
 
 
