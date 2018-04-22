@@ -16,7 +16,7 @@ LFPW_size = 996
 data_path = './300W-3D/'
 subsets = ['AFW', 'HELEN', 'IBUG', 'LFPW']
 
-data_path = '../preprocessed/'
+data_path = './preprocessed/'
 
 def convert_to_voxels(vertices):
     if vertices.size:
@@ -81,4 +81,7 @@ def get_batch(size):
         voxels.append(vox)
         images.append(image)
 
-    return (images, vertices, voxels)
+    np_images = np.array(images)
+    np_voxels = np.array(voxels)
+
+    return (np_images, np_voxels)

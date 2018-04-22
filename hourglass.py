@@ -1,8 +1,5 @@
 import tensorflow as tf
-import numpy as np
 import tensorflow.contrib.slim as slim
-import sklearn
-from DataManager.manager import get_batch
 
 '''
 RESBLOCK BOIZ
@@ -30,7 +27,6 @@ def get_hourglass(features, layer_details, pool_details, residual_module):
     input_layer = tf.reshape(features, [-1, 200, 200, 3])
     #construct the first half of our downsampling convolutional layers, going off of layer_details and pool_details
     conv_layers = [input_layer]
-    # conv_input_shapes = [input_layer.get_shape()]
     last_layer = input_layer
 
     for (kernel_dim1, kernel_dim2, kernel_dim3, nfilters, padding, activation), (pool_dim1, pool_dim2, pool_dim3, stride) in zip(layer_details, pool_details):
@@ -40,39 +36,23 @@ def get_hourglass(features, layer_details, pool_details, residual_module):
             kernel_size=[kernel_dim1, kernel_dim2],
             padding=padding,
             activation=activation)
-        # print("Original new conv layer shape:", new_conv_layer.shape)
-        # new_conv_layer = tf.reshape(new_conv_layer, new_conv_layer.get_shape().as_list()[0:3]+[3,-1])
-        # print(".")
-        # print("Resized new conv layer shape:", new_conv_layer.shape)
         new_pool = tf.layers.max_pooling2d(inputs=new_conv_layer, pool_size=[pool_dim1, pool_dim2], strides=stride)
-        # print("New pool shape:", new_pool.shape)
 
-        #Each layer's size is dependent on their poolsize, and so we save these for upsampling later
-        #conv_input_shapes.append(layers.shape)
-        # layers.append(new_/conv_layer)
         conv_layers.append(new_pool)
-        # conv_input_shapes.append(new_pool.get_shape())
         last_layer = new_pool
-    # conv_input_shapes.pop()
 
     #upsample time!
     for i in range(len(conv_layers) - 1):
         #upsample by nearest neighbor
-        # print(last_layer.shape)
         corresponding_layer = conv_layers[-(i+2)]
 
         upsampled_size = corresponding_layer.shape[1:3]
 
         new_upsample_layer = tf.image.resize_nearest_neighbor(last_layer, size=upsampled_size)
-        #if i == len(conv_input_shapes)-2:
-        #new_upsample_layer = tf.reshape(new_upsample_layer, [-1, 200, 200, 1])
         #add residual layer
         residual_layer = residual_module(corresponding_layer)
 
-        # if i == len(conv_input_shapes)-2:
-        #     new_upsample_layer = tf.reshape(new_upsample_layer, layer_size)
         last_layer = tf.add(new_upsample_layer, residual_layer)
-        # layers.append(new_upsample_layer)
 
 
     #finally, 200 1x1 convolutional layers and we're done
@@ -81,7 +61,6 @@ def get_hourglass(features, layer_details, pool_details, residual_module):
         filters=200,
         kernel_size=[1,1],
         activation=None)
-    # new_conv_layer = tf.reshape(new_conv_layer, [-1, 200, 200, 200])
     last_layer = new_conv_layer
     #return our last layer, the output
     return last_layer
