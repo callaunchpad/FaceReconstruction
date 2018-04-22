@@ -28,10 +28,12 @@ def train_model(batch_size, iterations):
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=hourglass_model, labels=labels), name= 'cross_entropy_loss')
     saver = tf.train.Saver()
 
+    first_optimizer = tf.train.AdamOptimizer(1e-3).minimize(loss)
+    second_optimizer = tf.train.AdamOptimizer(1e-5).minimize(loss)
+
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-
-        train_step = tf.train.AdamOptimizer(1e-3).minimize(loss)
+        train_step = first_optimizer
         for i in range(iterations):
             print("Iteration %i" % i)
             images, voxels = get_batch(batch_size)
@@ -53,7 +55,7 @@ def train_model(batch_size, iterations):
             if (i % 10 == 0):
                 saver.save(sess, './models/chkpt')
 
-        train_step = tf.train.AdamOptimizer(1e-5).minimize(loss)
+        train_step = second_optimizer
         for i in range(iterations):
             print("Iteration %i" % i)
             images, voxels = get_batch(batch_size)
@@ -80,4 +82,4 @@ def train_model(batch_size, iterations):
 
 if __name__ == "__main__":
     model_path = "hourglass_util/"
-    train_model(batch_size=50, iterations=500)
+    train_model(batch_size=50, iterations=501)
