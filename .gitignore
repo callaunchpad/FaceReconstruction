@@ -5,6 +5,7 @@
 preprocessed/
 hourglass_util/
 .idea/
+models/*
 
 
 # General

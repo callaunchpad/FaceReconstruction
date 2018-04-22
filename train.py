@@ -1,5 +1,5 @@
 from hourglass import *
-import tensorflow as tf
+import tensorflow as tf 
 import numpy as np
 
 #given a path for saving progress for our model, training and label data, returns trained model.
@@ -30,11 +30,15 @@ def train_model(path, train_data, train_labels, batch_size, iterations, load=Fal
         for i in range(iterations):
             print("Iteration %i" % i)
             images, voxels = get_batch(batch_size)
-            err = train_step.run(loss, feed_dict = {input: images, labels: voxels})
+            feed_dict = {input: images, labels: voxels}
+            train_step.run(feed_dict=feed_dict)
+            err, _ = sess.run([loss, train_step], feed_dict = feed_dict)
+            if i % 5 == 0:
+                err = sess.run(loss, feed_dict=feed_dict)
+                print("Loss: %i, %f " % (i, err))
             #save our sess every 100 iterations
-            if (i % 100 == 0):
-                print("Error": , err)
-                saver.save(sess, 'hourglass_model_sess')
+            if (i % 10 == 0):
+                saver.save(sess, './models/chkpt')
 
 
     return hourglass_model
