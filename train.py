@@ -48,4 +48,4 @@ def train_model(batch_size, iterations):
 
 if __name__ == "__main__":
     model_path = "hourglass_util/"
-    train_model(batch_size=50, iterations=1000)
+    train_model(batch_size=2, iterations=1000)
