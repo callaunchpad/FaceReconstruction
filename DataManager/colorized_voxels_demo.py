@@ -48,5 +48,5 @@ def visualize_voxels(image, voxels):
 	ax.scatter(xs=xs, ys=ys, zs=zs, color=colors, s=5)
 	plt.show()
 
-
-demo()
+if __name__ == '__main__':
+    demo()
