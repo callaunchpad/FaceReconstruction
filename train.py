@@ -26,11 +26,12 @@ def train_model(batch_size, iterations):
     hourglass_model = get_model(input)
 
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=hourglass_model, labels=labels), name= 'cross_entropy_loss')
-    train_step = tf.train.AdamOptimizer(1e-3).minimize(loss)
     saver = tf.train.Saver()
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
+
+        train_step = tf.train.AdamOptimizer(1e-3).minimize(loss)
         for i in range(iterations):
             print("Iteration %i" % i)
             images, voxels = get_batch(batch_size)
@@ -52,9 +53,31 @@ def train_model(batch_size, iterations):
             if (i % 10 == 0):
                 saver.save(sess, './models/chkpt')
 
+        train_step = tf.train.AdamOptimizer(1e-5).minimize(loss)
+        for i in range(iterations):
+            print("Iteration %i" % i)
+            images, voxels = get_batch(batch_size)
+            feed_dict = {input: images, labels: voxels}
+            try:
+                sess.run(train_step, feed_dict=feed_dict)
+            except ValueError:
+                print("Random error optimizing, don't know what's wrong. Just skipping this epoch.")
+                continue
+                pass
+            if i % 5 == 0:
+                try:
+                    err = sess.run(loss, feed_dict=feed_dict)
+                    print("Loss: %i, %f " % (i, err))
+                except ValueError:
+                    print("Random error calculating loss, don't know what's wrong. Just skipping this epoch.")
+                    pass
+            # save our sess every 100 iterations
+            if (i % 10 == 0):
+                saver.save(sess, './models/chkpt')
+
 
     return hourglass_model
 
 if __name__ == "__main__":
     model_path = "hourglass_util/"
-    train_model(batch_size=50, iterations=1000)
+    train_model(batch_size=50, iterations=500)
