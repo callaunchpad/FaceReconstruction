@@ -16,7 +16,7 @@ LFPW_size = 996
 data_path = './300W-3D/'
 subsets = ['AFW', 'HELEN', 'IBUG', 'LFPW']
 
-data_path = '../preprocessed/'
+data_path = './preprocessed/'
 
 def convert_to_voxels(vertices):
     if vertices.size:

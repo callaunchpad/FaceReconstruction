@@ -1,6 +1,6 @@
 from hourglass import *
 import tensorflow as tf
-import numpy as np
+from DataManager.manager import get_batch
 
 def get_model(input):
     layers = [(200, 200, 3), (125, 125, 3), (50, 50, 3), (4, 4, 3)]
@@ -47,6 +47,6 @@ def train_model(batch_size, iterations):
 
     return hourglass_model
 
-if __name__ == "__name__":
+if __name__ == "__main__":
     model_path = "hourglass_util/"
     train_model(batch_size=100, iterations=1000)
