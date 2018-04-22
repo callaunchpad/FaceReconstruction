@@ -3,6 +3,7 @@ import numpy as np
 import scipy
 import scipy.io as scio
 import os
+from PIL import Image
 
 max_z = 248
 
@@ -15,7 +16,7 @@ LFPW_size = 996
 data_path = './300W-3D/'
 subsets = ['AFW', 'HELEN', 'IBUG', 'LFPW']
 
-data_path = 'preprocessed/'
+data_path = '../preprocessed/'
 
 def convert_to_voxels(vertices):
     if vertices.size:
@@ -44,10 +45,10 @@ def convert_to_voxels(vertices):
 
 ''' Supply this function with the size of the batch you want.
 
-    Returns a list of vertics and corresponding voxels.
+    Returns a list of images, corresponding vertices, and corresponding voxels.
 '''
 def get_batch(size):
-    vertices, voxels = [], []
+    vertices, voxels, images = [], [], []
     for _ in range(size):
         subset = ''
         index = np.random.randint(0, 3667)
@@ -63,18 +64,21 @@ def get_batch(size):
             subset = 'LFPW'
             index -= AFW_size + HELEN_size + IBUG_size
 
-        matdir = data_path + subset + '/'
+        filedir = data_path + subset + '/'
 
-        mats = []
-        for file in os.listdir(matdir):
+        mats, jpgs = [], []
+        for file in os.listdir(filedir):
             if file.endswith('.mat'):
-                mats.append(matdir + file)
+                mats.append(filedir + file)
+                jpgs.append(filedir + file.replace('.mat', '.jpg'))
 
         data = scipy.io.loadmat(mats[index])
         vert = data['3D-vertices']
         vox = convert_to_voxels(vert)
+        image = np.array(Image.open(jpgs[index]))
 
         vertices.append(vert)
         voxels.append(vox)
+        images.append(image)
 
-    return (vertices, voxels)
+    return (images, vertices, voxels)
