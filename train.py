@@ -7,7 +7,7 @@ def get_model(input):
     kernels = [(4, 4, 3), (4, 4, 3), (4, 4, 3)]
     filters = [3 for i in range(len(layers)-1)]
     padding = ["valid" for i in range(len(layers)-1)]
-    activation = [tf.nn.relu for i in range(len(layers)-1)]
+    activation = [tf.nn.elu for i in range(len(layers)-1)]
 
     layer_details = [(kernels[i][0], kernels[i][1], kernels[i][2], filters[i], padding[i], activation[i]) for i in range(len(layers)-1)]
     #residual_model = lambda x : x
