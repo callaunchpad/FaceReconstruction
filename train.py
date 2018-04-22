@@ -25,8 +25,8 @@ def train_model(batch_size, iterations):
     labels = tf.placeholder(tf.float32, name="labels", shape=(None, 200, 200, 200))
     hourglass_model = get_model(input)
 
-    loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=hourglass_model, labels=labels), name= 'cross_entropy_loss')
-    train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)
+    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=hourglass_model, labels=labels), name= 'cross_entropy_loss')
+    train_step = tf.train.AdamOptimizer(1e-3).minimize(loss)
     saver = tf.train.Saver()
 
     with tf.Session() as sess:
