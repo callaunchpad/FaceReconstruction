@@ -27,13 +27,9 @@ def train_model(path, train_data, train_labels, batch_size, iterations):
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         for i in range(iterations):
-            print("iteration ", i)
-            batch_x, batch_y = get_batch(batch_size)
-            print(type(batch_x))
-            print(len(batch_x))
-            print(type(batch_x[0]))
-            print(batch_x[0].shape)
-            train_step.run(feed_dict = {input: batch_x, labels: batch_y})
+            print("Iteration %i" % i)
+            images, voxels = get_batch(batch_size)
+            train_step.run(feed_dict = {input: images, labels: voxels})
 
     return hourglass_model
 
