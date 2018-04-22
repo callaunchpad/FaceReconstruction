@@ -4,7 +4,7 @@ import numpy as np
 
 #given a path for saving progress for our model, training and label data, returns trained model.
 #this is where most of the training will take effect
-def train_model(path, train_data, train_labels, batch_size, iterations):
+def train_model(path, train_data, train_labels, batch_size, iterations, load=False):
     layers = [(200, 200, 3), (125, 125, 3), (50, 50, 3), (4, 4, 3)]
     kernels = [(4, 4, 3), (4, 4, 3), (4, 4, 3)]
     filters = [3 for i in range(len(layers)-1)]
@@ -23,6 +23,7 @@ def train_model(path, train_data, train_labels, batch_size, iterations):
 
     loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=hourglass_model, labels=labels), name= 'cross_entropy_loss')
     train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)
+    saver = tf.train.Saver()
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -30,6 +31,10 @@ def train_model(path, train_data, train_labels, batch_size, iterations):
             print("Iteration %i" % i)
             images, voxels = get_batch(batch_size)
             train_step.run(feed_dict = {input: images, labels: voxels})
+            #save our sess every 100 iterations
+            if (i % 100 == 0):
+                saver.save(sess, 'hourglass_model_sess')
+
 
     return hourglass_model
 
