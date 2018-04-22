@@ -36,7 +36,7 @@ def train_model(batch_size, iterations):
             images, voxels = get_batch(batch_size)
             feed_dict = {input: images, labels: voxels}
             train_step.run(feed_dict=feed_dict)
-            err, _ = sess.run([loss, train_step], feed_dict = feed_dict)
+            sess.run(train_step, feed_dict = feed_dict)
             if i % 5 == 0:
                 err = sess.run(loss, feed_dict=feed_dict)
                 print("Loss: %i, %f " % (i, err))
@@ -48,9 +48,5 @@ def train_model(batch_size, iterations):
     return hourglass_model
 
 if __name__ == "name":
-    train_data = np.array([np.random.rand(200, 200, 3) for i in range(2)]).astype('float32')
-    train_labels = np.array([np.random.rand(200, 200, 200) for i in range(2)]).astype('float32')
     model_path = "hourglass_util/"
-
-
     train_model(batch_size=100, iterations=1000)
