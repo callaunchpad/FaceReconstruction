@@ -19,7 +19,7 @@ def get_model(input):
 
 
 #given a path for saving progress for our model, training and label data, returns trained model.
-#this is where most of the training will take effect
+#this is where most of the trgit aining will take effect
 def train_model(batch_size, iterations):
     input = tf.placeholder(tf.float32, name="input", shape=(None, 200, 200, 3))
     labels = tf.placeholder(tf.float32, name="labels", shape=(None, 200, 200, 200))
