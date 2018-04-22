@@ -35,10 +35,19 @@ def train_model(batch_size, iterations):
             print("Iteration %i" % i)
             images, voxels = get_batch(batch_size)
             feed_dict = {input: images, labels: voxels}
-            sess.run(train_step, feed_dict=feed_dict)
+            try:
+                sess.run(train_step, feed_dict=feed_dict)
+            except ValueError:
+                print("Random error optimizing, don't know what's wrong. Just skipping this epoch.")
+                continue
+                pass
             if i % 5 == 0:
-                err = sess.run(loss, feed_dict=feed_dict)
-                print("Loss: %i, %f " % (i, err))
+                try:
+                    err = sess.run(loss, feed_dict=feed_dict)
+                    print("Loss: %i, %f " % (i, err))
+                except ValueError:
+                    print("Random error calculating loss, don't know what's wrong. Just skipping this epoch.")
+                    pass
             #save our sess every 100 iterations
             if (i % 10 == 0):
                 saver.save(sess, './models/chkpt')
@@ -48,4 +57,4 @@ def train_model(batch_size, iterations):
 
 if __name__ == "__main__":
     model_path = "hourglass_util/"
-    train_model(batch_size=2, iterations=1000)
+    train_model(batch_size=50, iterations=1000)
