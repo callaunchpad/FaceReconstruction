@@ -1,15 +1,12 @@
 import tensorflow as tf
-import numpy as np
 import tensorflow.contrib.slim as slim
-import sklearn
-from DataManager.manager import get_batch
 
 '''
 RESBLOCK BOIZ
 '''
-def resBlock(x,channels=3,kernel_size=[3,3],scale=1):
+def resBlock(x,channels=3,kernel_size=[3,3],scale=1, activation=tf.nn.elu):
     tmp = slim.conv2d(x,channels,kernel_size,activation_fn=None)
-    tmp = tf.nn.relu(tmp)
+    tmp = activation(tmp)
     tmp = slim.conv2d(tmp,channels,kernel_size,activation_fn=None)
     tmp *= scale
     return x + tmp
