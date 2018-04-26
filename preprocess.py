@@ -133,9 +133,9 @@ def processFileAndSave(image_path, crop_out_path, transform_out_path):
 
 '''Does the same as above, but returns the crop and transform instead of saving them.'''
 def processFile(image_path):
-    dimensions = getBounding(crop)
+    dimensions = getBounding(image_path)
     if dimensions:
-        cropped_img = cropFace(crop, dimensions)
+        cropped_img = cropFace(image_path, dimensions)
         transform = getTransform(dimensions)
         return (cropped_img, transform)
 
