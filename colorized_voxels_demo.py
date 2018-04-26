@@ -43,9 +43,10 @@ def visualize_voxels(cropped_image, voxels):
 				xs.append(x)
 				ys.append(y)
 				zs.append(z)
-				colors.append(np.array(list(cropped_image.getpixel((x, y)))) / 255.0)
+				# colors.append(np.array(list(cropped_image.getpixel((x, y)))) / 255.0)
 
-	ax.scatter(xs=xs, ys=ys, zs=zs, color=colors, s=5)
+	ax.scatter(xs=xs, ys=ys, zs=zs, s=5)
+	# ax.scatter(xs=xs, ys=ys, zs=zs, color=colors, s=5)
 	plt.show()
 
 if __name__ == '__main__':

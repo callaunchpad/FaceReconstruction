@@ -19,7 +19,7 @@ def predict(filepath, loadFile=False):
         saver = tf.train.import_meta_graph('./models/chkpt.meta')
         saver.restore(sess,tf.train.latest_checkpoint('./models/'))
         voxels = sess.run(hourglass_model, feed_dict = {input: [image]})[0]
-        return np.where(voxels > 0.5, 1, 0)
+        return np.where(voxels > 0, 1, 0)
 
 
 
