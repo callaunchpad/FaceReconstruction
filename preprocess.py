@@ -102,15 +102,37 @@ def getBounding(face_path, use_cnn = False):
             y_min = min(i.y, y_min)
         return (x_max, y_max, x_min, y_min)
 
-def saveFace(output_path, pil_img):
-    pil_img.save(output_path)
-
 def cropFace(face_path, dimensions):
     x_max, y_max, x_min, y_min = dimensions
     crop_rectangle = (x_min, y_min, x_max, y_max)
     im = Image.open(face_path)
     cropped_im_res = im.crop(crop_rectangle).resize((200, 200), Image.ANTIALIAS)
     return cropped_im_res
+
+def saveFace(output_path, pil_img):
+    pil_img.save(output_path)
+
+def saveTransform(output_path, transform):
+    savemat(out_path, transform)
+
+def loadTransform(transform_path):
+    return loadmat(transform_path)
+
+
+
+##########################################
+### Single File Preprocessing Function ###
+##########################################
+
+'''Input an image path, a path to save the cropped image, and a path to save the
+associated transform of the crop.'''
+def processFile(jpg_path, crop_out_path, transform_out_path):
+    dimensions = getBounding(jpg_path)
+    if dimensions:
+        cropped_img = cropFace(jpg_path, dimensions)
+        transform = getTransform(dimensions)
+        saveFace(crop_out_path, cropped_img)
+        saveTransform(transform_out_path, transform)
 
 
 
@@ -130,21 +152,26 @@ for subset in subsets:
     if not os.path.exists(mesh_out_folder + subset):
         os.makedirs(mesh_out_folder + subset)
 
+# Create saved transfrom folders
+transform_out_folder = './preprocessed/'
+for subset in subsets:
+    if not os.path.exists(transform_out_folder + subset):
+        os.makedirs(transform_out_folder + subset)
+
 
 for subset in subsets:
     mypath = data_path + subset + '/'
     filepaths = [f for f in listdir(mypath) if isfile(join(mypath, f)) and f[-4:] == '.jpg']
 
     for i in range(len(filepaths)):
-    # for i in range(1):
         f = filepaths[i]
         face_path = data_path + subset + '/' + f
         landmark_path = face_path[:-4] + '.mat'
         mesh_path = './300W-3D-Face/' + subset + '/' + f[:-4] + '.mat'
         mesh_out_path = mesh_out_folder + subset + '/' + f[:-4] + '.mat'
+        transform_out_path = transform_out_folder + subset + '/' + f[:-4] + '_transform.mat'
         cropped_path = crop_folder + subset + '/' + f
 
-        # print("Min: {}  Max: {}".format(min(z), max(z)))
         dimensions = getBounding(face_path)
         if dimensions:
             cropped_img = cropFace(face_path, dimensions)
@@ -153,7 +180,8 @@ for subset in subsets:
             process_3D_labels(landmark_path, mesh_path, transform['A'], transform['b'], 200, 200, mesh_out_path)
 
             saveFace(cropped_path, cropped_img)
-        #
+            saveTransform(transform_out_path, transform)
+        
         if not i % 50:
             print("Processing " + subset + " image {} of {}".format(i, len(filepaths)))
 
