@@ -25,11 +25,13 @@ def train_model(batch_size, iterations):
     labels = tf.placeholder(tf.float32, name="labels", shape=(None, 200, 200, 200))
     hourglass_model = get_model(input)
 
-    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=hourglass_model, labels=labels), name= 'cross_entropy_loss')
+    cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(logits=hourglass_model, labels=labels)
+    loss = tf.reduce_mean(cross_entropy, name= 'cross_entropy_loss')
+
     saver = tf.train.Saver()
 
     first_optimizer = tf.train.AdamOptimizer(1e-3).minimize(loss)
-    second_optimizer = tf.train.AdamOptimizer(1e-5).minimize(loss)
+    second_optimizer = tf.train.AdamOptimizer(1e-4).minimize(loss)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -82,4 +84,4 @@ def train_model(batch_size, iterations):
 
 if __name__ == "__main__":
     model_path = "hourglass_util/"
-    train_model(batch_size=50, iterations=501)
+    train_model(batch_size=50, iterations=751)
