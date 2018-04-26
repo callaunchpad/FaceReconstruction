@@ -30,10 +30,10 @@ def demo():
 	image = Image.fromarray(images[0], 'RGB')
 	voxels = voxel_lst[0]
 
-	visualize_voxels(image, voxels)
+	visualize_voxels(image, voxels)	
 
 
-def visualize_voxels(image, voxels):
+def visualize_voxels(cropped_image, voxels):
 	fig = plt.figure()
 	ax = fig.add_subplot(111, projection='3d')
 	xs, ys, zs, colors = [], [], [], []
@@ -43,7 +43,7 @@ def visualize_voxels(image, voxels):
 				xs.append(x)
 				ys.append(y)
 				zs.append(z)
-				colors.append(np.array(list(image.getpixel((x, y)))) / 255.0)
+				colors.append(np.array(list(cropped_image.getpixel((x, y)))) / 255.0)
 
 	ax.scatter(xs=xs, ys=ys, zs=zs, color=colors, s=5)
 	plt.show()
