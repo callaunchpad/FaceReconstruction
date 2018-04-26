@@ -2,7 +2,7 @@ from hourglass import *
 import tensorflow as tf
 from DataManager.manager import get_batch
 
-def get_model(input):
+def get_model(input, name='hourglass'):
     layers = [(200, 200, 3), (125, 125, 3), (50, 50, 3), (4, 4, 3)]
     kernels = [(4, 4, 3), (4, 4, 3), (4, 4, 3)]
     filters = [3 for i in range(len(layers)-1)]
@@ -14,8 +14,8 @@ def get_model(input):
     residual_model = resBlock
     pool_details = [(73, 73, 1, 1), (73, 73, 1, 1), (44, 44, 1, 1)]
 
-
-    return get_hourglass(input, layer_details, pool_details, residual_model)
+    hourglass = get_hourglass(input, layer_details, pool_details, residual_model)
+    return tf.identity(hourglass, name=name)
 
 
 #given a path for saving progress for our model, training and label data, returns trained model.
@@ -23,13 +23,14 @@ def get_model(input):
 def train_model(batch_size, iterations):
     input = tf.placeholder(tf.float32, name="input", shape=(None, 200, 200, 3))
     labels = tf.placeholder(tf.float32, name="labels", shape=(None, 200, 200, 200))
-    hourglass_model = get_model(input)
+    hourglass_model = get_model(input, name='hourglass')
 
-    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=hourglass_model, labels=labels), name= 'cross_entropy_loss')
+    cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(logits=hourglass_model, labels=labels)
+    loss = tf.reduce_mean(cross_entropy, name= 'cross_entropy_loss')
+
     saver = tf.train.Saver()
 
     first_optimizer = tf.train.AdamOptimizer(1e-3).minimize(loss)
-    second_optimizer = tf.train.AdamOptimizer(1e-5).minimize(loss)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -55,31 +56,9 @@ def train_model(batch_size, iterations):
             if (i % 10 == 0):
                 saver.save(sess, './models/chkpt')
 
-        train_step = second_optimizer
-        for i in range(iterations):
-            print("Iteration %i" % i)
-            images, voxels = get_batch(batch_size)
-            feed_dict = {input: images, labels: voxels}
-            try:
-                sess.run(train_step, feed_dict=feed_dict)
-            except ValueError:
-                print("Random error optimizing, don't know what's wrong. Just skipping this epoch.")
-                continue
-                pass
-            if i % 5 == 0:
-                try:
-                    err = sess.run(loss, feed_dict=feed_dict)
-                    print("Loss: %i, %f " % (i, err))
-                except ValueError:
-                    print("Random error calculating loss, don't know what's wrong. Just skipping this epoch.")
-                    pass
-            # save our sess every 100 iterations
-            if (i % 10 == 0):
-                saver.save(sess, './models/chkpt')
-
 
     return hourglass_model
 
 if __name__ == "__main__":
     model_path = "hourglass_util/"
-    train_model(batch_size=50, iterations=501)
+    train_model(batch_size=50, iterations=2000)
