@@ -113,7 +113,7 @@ def saveFace(output_path, pil_img):
     pil_img.save(output_path)
 
 def saveTransform(output_path, transform):
-    savemat(out_path, transform)
+    savemat(output_path, transform)
 
 def loadTransform(transform_path):
     return loadmat(transform_path)
@@ -126,13 +126,19 @@ def loadTransform(transform_path):
 
 '''Input an image path, a path to save the cropped image, and a path to save the
 associated transform of the crop.'''
-def processFile(jpg_path, crop_out_path, transform_out_path):
-    dimensions = getBounding(jpg_path)
+def processFileAndSave(image_path, crop_out_path, transform_out_path):
+    cropped_img, transform = processFile(image_path)
+    saveFace(crop_out_path, cropped_img)
+    saveTransform(transform_out_path, transform)
+
+'''Does the same as above, but returns the crop and transform instead of saving them.'''
+def processFile(image_path):
+    dimensions = getBounding(crop)
     if dimensions:
-        cropped_img = cropFace(jpg_path, dimensions)
+        cropped_img = cropFace(crop, dimensions)
         transform = getTransform(dimensions)
-        saveFace(crop_out_path, cropped_img)
-        saveTransform(transform_out_path, transform)
+        return (cropped_img, transform)
+
 
 
 
