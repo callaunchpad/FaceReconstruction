@@ -39,6 +39,7 @@ def visualize_voxels(cropped_image, voxels):
 	xs, ys, zs, colors = [], [], [], []
 	for x in range(0, 200, STRIDE):
 		for y in range(0, 200, STRIDE):
+			print(np.argwhere(voxels[x][y] == 1))
 			for z in np.argwhere(voxels[x][y] == 1).T[0]:
 				xs.append(x)
 				ys.append(y)
