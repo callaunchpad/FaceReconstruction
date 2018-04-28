@@ -5,7 +5,7 @@ from DataManager.manager import get_batch
 def get_model(input, name='hourglass'):
     layers = [(200, 200, 3), (125, 125, 3), (50, 50, 3), (4, 4, 3)]
     kernels = [(4, 4, 3), (4, 4, 3), (4, 4, 3)]
-    filters = [3 for i in range(len(layers)-1)]
+    filters = [256 for i in range(len(layers)-1)]
     padding = ["valid" for i in range(len(layers)-1)]
     activation = [tf.nn.elu for i in range(len(layers)-1)]
 

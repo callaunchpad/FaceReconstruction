@@ -10,6 +10,7 @@ input = tf.placeholder(tf.float32, name="input", shape=(None, 200, 200, 3))
 labels = tf.placeholder(tf.float32, name="labels", shape=(None, 200, 200, 200))
 model = get_model(input, name="hourglass")
 sess.run(tf.global_variables_initializer())
+sess.run(tf.local_variables_initializer())
 saver = tf.train.Saver()
 saver.restore(sess, './models/chkpt')
 
