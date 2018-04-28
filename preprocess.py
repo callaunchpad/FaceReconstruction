@@ -166,6 +166,12 @@ if __name__ == '__main__':
         if not os.path.exists(transform_out_folder + subset):
             os.makedirs(transform_out_folder + subset)
 
+    # Create original image folders
+    original_image_folder = './preprocessed/originals/'
+    for subset in subsets:
+        if not os.path.exists(original_image_folder + subset):
+            os.makedirs(original_image_folder + subset)
+
 
     for subset in subsets:
         mypath = data_path + subset + '/'
@@ -174,11 +180,15 @@ if __name__ == '__main__':
         for i in range(len(filepaths)):
             f = filepaths[i]
             face_path = data_path + subset + '/' + f
+            original_face_path = original_image_folder + subset + '/' + f[:-4] + '_original.jpg'
             landmark_path = face_path[:-4] + '.mat'
             mesh_path = './300W-3D-Face/' + subset + '/' + f[:-4] + '.mat'
             mesh_out_path = mesh_out_folder + subset + '/' + f[:-4] + '.mat'
             transform_out_path = transform_out_folder + subset + '/' + f[:-4] + '_transform.mat'
             cropped_path = crop_folder + subset + '/' + f
+
+            # Save a copy of the original image
+            saveFace(original_face_path, Image.open(face_path))
 
             dimensions = getBounding(face_path)
             if dimensions:
