@@ -26,7 +26,7 @@ def subsample(vertices, rate):
 
 """Displays a single image retrieved using get_batch()."""
 def demo():
-	images, voxel_lst = get_batch(1)
+	images, _, voxel_lst = get_batch(1)
 	image = Image.fromarray(images[0], 'RGB')
 	voxels = voxel_lst[0]
 
