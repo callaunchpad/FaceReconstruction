@@ -1,5 +1,5 @@
 from Inference import predict
-from colorized_voxels_demo import visualize_voxels
+from colorized_voxels_demo import *
 from preprocess import processFile
 from PIL import Image
 import numpy as np
@@ -15,7 +15,7 @@ def pipeline(filePath):
     #get voxels
     voxels = predict(cropped,loadFile=True)
     #visualize
-    visualize_voxels(cropped, voxels)
+    visualize_voxels_original(cropped, voxels)
 
 
 if __name__ == '__main__':
