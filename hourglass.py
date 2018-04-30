@@ -4,7 +4,7 @@ import tensorflow.contrib.slim as slim
 '''
 RESBLOCK BOIZ
 '''
-def resBlock(x,channels=3,kernel_size=[3,3],scale=1, activation=tf.nn.elu):
+def resBlock(x,channels=256,kernel_size=[3,3],scale=1, activation=tf.nn.elu):
     tmp = slim.conv2d(x,channels,kernel_size,activation_fn=None)
     tmp = activation(tmp)
     tmp = slim.conv2d(tmp,channels,kernel_size,activation_fn=None)
@@ -51,6 +51,7 @@ def get_hourglass(features, layer_details, pool_details, residual_module):
         new_upsample_layer = tf.image.resize_nearest_neighbor(last_layer, size=upsampled_size)
         #add residual layer
         residual_layer = residual_module(corresponding_layer)
+        print("upsamp", new_upsample_layer.shape)
 
         last_layer = tf.add(new_upsample_layer, residual_layer)
 
