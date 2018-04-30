@@ -44,7 +44,6 @@ def train_model(batch_size, iterations):
             except ValueError:
                 print("Random error optimizing, don't know what's wrong. Just skipping this epoch.")
                 continue
-                pass
             if i % 5 == 0:
                 try:
                     err = sess.run(loss, feed_dict=feed_dict)
