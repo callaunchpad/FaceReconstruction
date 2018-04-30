@@ -59,5 +59,5 @@ def train_model(batch_size, iterations):
     return hourglass_model
 
 if __name__ == "__main__":
-    model_path = "hourglass_util/"
+    # model_path = "hourglass_util/"
     train_model(batch_size=2, iterations=2000)
