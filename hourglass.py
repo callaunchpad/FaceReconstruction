@@ -42,7 +42,7 @@ def get_hourglass(features, layer_details, pool_details, residual_module):
         last_layer = new_pool
 
     #upsample time!
-    for i in range(len(conv_layers) - 1):
+    for i in range(len(conv_layers) - 2):
         #upsample by nearest neighbor
         corresponding_layer = conv_layers[-(i+2)]
 
@@ -55,6 +55,9 @@ def get_hourglass(features, layer_details, pool_details, residual_module):
 
         last_layer = tf.add(new_upsample_layer, residual_layer)
 
+    corresponding_layer = conv_layers[0]
+    upsampled_size = corresponding_layer.shape[1:3]
+    last_layer = tf.image.resize_nearest_neighbor(last_layer, size=upsampled_size)
 
     #finally, 200 1x1 convolutional layers and we're done
     new_conv_layer = tf.layers.conv2d(
