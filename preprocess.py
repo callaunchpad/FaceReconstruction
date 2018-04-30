@@ -113,7 +113,7 @@ def saveFace(output_path, pil_img):
     pil_img.save(output_path)
 
 def saveTransform(output_path, transform):
-    savemat(out_path, transform)
+    savemat(output_path, transform)
 
 def loadTransform(transform_path):
     return loadmat(transform_path)
@@ -126,13 +126,19 @@ def loadTransform(transform_path):
 
 '''Input an image path, a path to save the cropped image, and a path to save the
 associated transform of the crop.'''
-def processFile(jpg_path, crop_out_path, transform_out_path):
-    dimensions = getBounding(jpg_path)
+def processFileAndSave(image_path, crop_out_path, transform_out_path):
+    cropped_img, transform = processFile(image_path)
+    saveFace(crop_out_path, cropped_img)
+    saveTransform(transform_out_path, transform)
+
+'''Does the same as above, but returns the crop and transform instead of saving them.'''
+def processFile(image_path):
+    dimensions = getBounding(image_path)
     if dimensions:
-        cropped_img = cropFace(jpg_path, dimensions)
+        cropped_img = cropFace(image_path, dimensions)
         transform = getTransform(dimensions)
-        saveFace(crop_out_path, cropped_img)
-        saveTransform(transform_out_path, transform)
+        return (cropped_img, transform)
+
 
 
 
@@ -140,74 +146,86 @@ def processFile(jpg_path, crop_out_path, transform_out_path):
 ### Preprocessing Script ###
 ############################
 
-# Create cropped image folders
-crop_folder = './preprocessed/'
-for subset in subsets:
-    if not os.path.exists(crop_folder + subset):
-        os.makedirs(crop_folder + subset)
+if __name__ == '__main__':
 
-# Create processed mesh folders
-mesh_out_folder = './preprocessed/'
-for subset in subsets:
-    if not os.path.exists(mesh_out_folder + subset):
-        os.makedirs(mesh_out_folder + subset)
+    # Create cropped image folders
+    crop_folder = './preprocessed/'
+    for subset in subsets:
+        if not os.path.exists(crop_folder + subset):
+            os.makedirs(crop_folder + subset)
 
-# Create saved transfrom folders
-transform_out_folder = './preprocessed/'
-for subset in subsets:
-    if not os.path.exists(transform_out_folder + subset):
-        os.makedirs(transform_out_folder + subset)
+    # Create processed mesh folders
+    mesh_out_folder = './preprocessed/'
+    for subset in subsets:
+        if not os.path.exists(mesh_out_folder + subset):
+            os.makedirs(mesh_out_folder + subset)
 
+    # Create saved transfrom folders
+    transform_out_folder = './preprocessed/'
+    for subset in subsets:
+        if not os.path.exists(transform_out_folder + subset):
+            os.makedirs(transform_out_folder + subset)
 
-for subset in subsets:
-    mypath = data_path + subset + '/'
-    filepaths = [f for f in listdir(mypath) if isfile(join(mypath, f)) and f[-4:] == '.jpg']
-
-    for i in range(len(filepaths)):
-        f = filepaths[i]
-        face_path = data_path + subset + '/' + f
-        landmark_path = face_path[:-4] + '.mat'
-        mesh_path = './300W-3D-Face/' + subset + '/' + f[:-4] + '.mat'
-        mesh_out_path = mesh_out_folder + subset + '/' + f[:-4] + '.mat'
-        transform_out_path = transform_out_folder + subset + '/' + f[:-4] + '_transform.mat'
-        cropped_path = crop_folder + subset + '/' + f
-
-        dimensions = getBounding(face_path)
-        if dimensions:
-            cropped_img = cropFace(face_path, dimensions)
-            transform = getTransform(dimensions)
-
-            process_3D_labels(landmark_path, mesh_path, transform['A'], transform['b'], 200, 200, mesh_out_path)
-
-            saveFace(cropped_path, cropped_img)
-            saveTransform(transform_out_path, transform)
-        
-        if not i % 50:
-            print("Processing " + subset + " image {} of {}".format(i, len(filepaths)))
+    # Create original image folders
+    original_image_folder = './preprocessed/originals/'
+    for subset in subsets:
+        if not os.path.exists(original_image_folder + subset):
+            os.makedirs(original_image_folder + subset)
 
 
+    for subset in subsets:
+        mypath = data_path + subset + '/'
+        filepaths = [f for f in listdir(mypath) if isfile(join(mypath, f)) and f[-4:] == '.jpg']
+
+        for i in range(len(filepaths)):
+            f = filepaths[i]
+            face_path = data_path + subset + '/' + f
+            original_face_path = original_image_folder + subset + '/' + f[:-4] + '_original.jpg'
+            landmark_path = face_path[:-4] + '.mat'
+            mesh_path = './300W-3D-Face/' + subset + '/' + f[:-4] + '.mat'
+            mesh_out_path = mesh_out_folder + subset + '/' + f[:-4] + '.mat'
+            transform_out_path = transform_out_folder + subset + '/' + f[:-4] + '_transform.mat'
+            cropped_path = crop_folder + subset + '/' + f
+
+            # Save a copy of the original image
+            saveFace(original_face_path, Image.open(face_path))
+
+            dimensions = getBounding(face_path)
+            if dimensions:
+                cropped_img = cropFace(face_path, dimensions)
+                transform = getTransform(dimensions)
+
+                process_3D_labels(landmark_path, mesh_path, transform['A'], transform['b'], 200, 200, mesh_out_path)
+
+                saveFace(cropped_path, cropped_img)
+                saveTransform(transform_out_path, transform)
+            
+            if not i % 50:
+                print("Processing " + subset + " image {} of {}".format(i, len(filepaths)))
 
 
-#########################
-### Plotting Examples ###
-#########################
 
-""" Displays some examples of cropped images and plots their transformed meshes."""
 
-if show_examples:
+    #########################
+    ### Plotting Examples ###
+    #########################
 
-    samples = ['AFW/4538917191_5', 'HELEN/3004338997_1', 'IBUG/image_027', 'LFPW/image_train_0166']
+    """ Displays some examples of cropped images and plots their transformed meshes."""
 
-    for sample in samples:
-        face_path = crop_folder + sample + '.jpg'
-        mesh_out_path = mesh_out_folder + sample + '.mat'
+    if show_examples:
 
-        img = Image.open(face_path)
-        mesh_dict = loadmat(mesh_out_path)
-        vertices = mesh_dict['3D-vertices']
+        samples = ['AFW/4538917191_5', 'HELEN/3004338997_1', 'IBUG/image_027', 'LFPW/image_train_0166']
 
-        plt.figure()
-        plt.imshow(img)
-        plt.plot(subsample(vertices[0], 30), subsample(vertices[1], 30), 'g.')
+        for sample in samples:
+            face_path = crop_folder + sample + '.jpg'
+            mesh_out_path = mesh_out_folder + sample + '.mat'
 
-    plt.show()
+            img = Image.open(face_path)
+            mesh_dict = loadmat(mesh_out_path)
+            vertices = mesh_dict['3D-vertices']
+
+            plt.figure()
+            plt.imshow(img)
+            plt.plot(subsample(vertices[0], 30), subsample(vertices[1], 30), 'g.')
+
+        plt.show()

@@ -47,8 +47,8 @@ def convert_to_voxels(vertices):
 
     Returns a list of images, corresponding vertices, and corresponding voxels.
 '''
-def get_batch(size):
-    vertices, voxels, images = [], [], []
+def get_batch(size, include_transforms=False):
+    vertices, voxels, images, transforms = [], [], [], []
     for _ in range(size):
         subset = ''
         index = np.random.randint(0, 3667)
@@ -66,13 +66,15 @@ def get_batch(size):
 
         filedir = data_path + subset + '/'
 
-        mats, jpgs = [], []
+        mats, jpgs, transforms = [], [], []
         for file in os.listdir(filedir):
-            if file.endswith('.mat'):
+            if file.endswith('.mat') and not file.endswith('_transform.mat'):
                 mats.append(filedir + file)
                 jpgs.append(filedir + file.replace('.mat', '.jpg'))
+                transforms.append(filedir + file.replace('.mat', '') + '_transform.mat')
 
         data = scipy.io.loadmat(mats[index])
+        transform = scipy.io.loadmat(transforms[index])
         vert = data['3D-vertices']
         vox = convert_to_voxels(vert)
         image = np.array(Image.open(jpgs[index]))
@@ -80,8 +82,57 @@ def get_batch(size):
         vertices.append(vert)
         voxels.append(vox)
         images.append(image)
+        transforms.append(transform)
 
     np_images = np.array(images)
     np_voxels = np.array(voxels)
+    np_transforms = np.array(transforms)
 
+    if include_transforms:
+        return (np_images, np_voxels, transforms)
     return (np_images, np_voxels)
+
+
+def get_visualization_batch(size):
+    vertices, voxels, images, transforms = [], [], [], []
+    for _ in range(size):
+        subset = ''
+        index = np.random.randint(0, 3667)
+        if index < AFW_size:
+            subset = 'AFW'
+        elif index < AFW_size + HELEN_size:
+            subset = 'HELEN'
+            index -= AFW_size
+        elif index < AFW_size + HELEN_size + IBUG_size:
+            subset = 'IBUG'
+            index -= AFW_size + HELEN_size
+        else:
+            subset = 'LFPW'
+            index -= AFW_size + HELEN_size + IBUG_size
+
+        filedir = data_path + subset + '/'
+        originaldir = data_path + 'originals/' + subset + '/'
+
+        mats, jpgs, transform_paths = [], [], []
+        for file in os.listdir(filedir):
+            if file.endswith('.mat') and not file.endswith('_transform.mat'):
+                mats.append(filedir + file)
+                jpgs.append(originaldir + file.replace('.mat', '_original.jpg'))
+                transform_paths.append(filedir + file.replace('.mat', '') + '_transform.mat')
+
+        data = scipy.io.loadmat(mats[index])
+        transform = scipy.io.loadmat(transform_paths[index])
+        vert = data['3D-vertices']
+        vox = convert_to_voxels(vert)
+        image = np.array(Image.open(jpgs[index]))
+
+        vertices.append(vert)
+        voxels.append(vox)
+        images.append(image)
+        transforms.append(transform)
+
+    np_images = np.array(images)
+    np_voxels = np.array(voxels)
+    np_transforms = np.array(transforms)
+
+    return (np_images, np_voxels, np_transforms)
