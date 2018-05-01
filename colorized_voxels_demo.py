@@ -59,16 +59,16 @@ def visualize_voxels_cropped(cropped_image, voxels, save=False):
 	base_xs, base_ys, base_zs, base_colors = [], [], [], []
 	for x in range(0, 200, STRIDE):
 		for y in range(0, 200, STRIDE):
-			color = np.array(list(cropped_image.getpixel((x, y)))) / 255.0
+			# color = np.array(list(cropped_image.getpixel((x, y)))) / 255.0
 			base_xs.insert(0, x)
 			base_ys.insert(0, 200-y)
 			base_zs.insert(0, 0)
-			base_colors.insert(0, color)
+			# base_colors.insert(0, color)
 			for z in np.argwhere(voxels[x][y] == 1).T[0]:
 				xs.append(x)
 				ys.append(200-y)
 				zs.append(z)
-				colors.append(color)
+				# colors.append(color)
 
 	avg_z = sum(zs) / float(len(zs))
 	zs = [max(z - avg_z, 0) for z in zs]
