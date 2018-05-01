@@ -31,13 +31,14 @@ def train_model(batch_size, iterations):
     saver = tf.train.Saver()
 
     first_optimizer = tf.train.AdamOptimizer(1e-3).minimize(loss)
+    images, voxels = get_batch(batch_size)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         train_step = first_optimizer
         for i in range(iterations):
             print("Iteration %i" % i)
-            images, voxels = get_batch(batch_size)
+            # images, voxels = get_batch(batch_size)
             feed_dict = {input: images, labels: voxels}
             try:
                 sess.run(train_step, feed_dict=feed_dict)
