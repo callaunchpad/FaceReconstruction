@@ -14,7 +14,7 @@ def get_model(input, name='hourglass'):
 
 #given a path for saving progress for our model, training and label data, returns trained model.
 #this is where most of the trgit aining will take effect
-def train_model(batch_size, iterations):
+def train_model(batch_size, iterations, load=False):
     input = tf.placeholder(tf.float32, name="input", shape=(None, 200, 200, 3))
     labels = tf.placeholder(tf.float32, name="labels", shape=(None, 200, 200, 200))
     hourglass_model = get_model(input, name='hourglass')
@@ -30,6 +30,15 @@ def train_model(batch_size, iterations):
     images, voxels = get_batch(batch_size)
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
+        if load:
+            saver = tf.train.import_meta_graph('./models/chkpt.meta')
+            saver.restore(sess, './models/chkpt')
+            graph = tf.get_default_graph()
+            input = graph.get_tensor_by_name("input:0")
+            labels = graph.get_tensor_by_name("labels:0")
+            model = graph.get_tensor_by_name("hourglass:0")
+            loss = graph.get_tensor_by_name("cross_entropy_loss:0")
+
         for i in range(iterations):
             print("Iteration %i" % i)
             # images, voxels = get_batch(batch_size)
