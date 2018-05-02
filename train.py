@@ -31,9 +31,7 @@ def train_model(batch_size, iterations):
 
     saver = tf.train.Saver()
 
-    step_size = tf.placeholder(tf.float32, name="step_size")
     adam_step = tf.train.AdamOptimizer(1e-3).minimize(loss)
-    gd_step = tf.train.GradientDescentOptimizer(step_size).minimize(loss)
     images, voxels = get_batch(batch_size)
     err = float('inf')
     with tf.Session() as sess:
@@ -43,13 +41,7 @@ def train_model(batch_size, iterations):
             # images, voxels = get_batch(batch_size)
             feed_dict = {input: images, labels: voxels}
             try:
-                if err < 0.03:
-                    feed_dict[step_size] = 1e-4
-                    if err < 0.01:
-                        feed_dict[step_size] = 1e-5
-                    train_step = gd_step
-                else:
-                    train_step = adam_step
+                train_step = adam_step
                 sess.run(train_step, feed_dict=feed_dict)
             except ValueError:
                 print("Random error optimizing, don't know what's wrong. Just skipping this epoch.")
