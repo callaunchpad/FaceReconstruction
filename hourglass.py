@@ -4,12 +4,12 @@ import tensorflow.contrib.slim as slim
 '''
 RESBLOCK BOIZ
 '''
-def resBlock(x,channels=256,kernel_size=[3,3],scale=1, activation=tf.nn.leaky_relu):
-    tmp = slim.conv2d(x,channels,kernel_size,activation_fn=None)
-    tmp = activation(tmp)
-    tmp = slim.conv2d(tmp,channels,kernel_size,activation_fn=None)
-    tmp *= scale
-    return x + tmp
+def resBlock(x,channels=256,kernel_size=[3,3], activation=tf.nn.leaky_relu):
+    result = tf.layers.conv2d(inputs=x, filters=channels/2, kernel_size=[1,1], activation=activation)
+    result = tf.layers.conv2d(inputs=result, filters=channels/2, kernel_size=kernel_size, activation=activation)
+    result = tf.layers.conv2d(inputs=result, filters=channels, kernel_size=[1,1], activation=activation)
+    result = slim.conv2d(x,channels/2,kernel_size,activation_fn=activation)
+    return x + result
 
 '''
 Our input layer is 200x200, and the smallest we get to is 4x4

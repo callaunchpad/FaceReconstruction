@@ -29,7 +29,6 @@ def train_model(batch_size, iterations, load=False):
     adam_step = tf.train.AdamOptimizer(1e-5).minimize(loss)
     images, voxels = get_batch(batch_size)
     with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
         if load:
             saver = tf.train.import_meta_graph('./models/chkpt.meta')
             saver.restore(sess, './models/chkpt')
@@ -38,6 +37,8 @@ def train_model(batch_size, iterations, load=False):
             labels = graph.get_tensor_by_name("labels:0")
             hourglass_model = graph.get_tensor_by_name("hourglass:0")
             loss = graph.get_tensor_by_name("cross_entropy_loss:0")
+        else:
+            sess.run(tf.global_variables_initializer())
 
         for i in range(iterations):
             print("Iteration %i" % i)
