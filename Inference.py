@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from train import get_model
+import model
 from PIL import Image
 from DataManager.manager import convert_to_voxels
 import scipy
@@ -8,26 +8,8 @@ from DataManager.surface_face_march import voxelToOBJ
 from DataManager.manager import get_batch
 
 sess = tf.Session()
-# inpt = tf.placeholder(tf.float32, name="input", shape=(None, 200, 200, 3))
-# labels = tf.placeholder(tf.float32, name="labels", shape=(None, 200, 200, 200))
-# model = get_model(inpt, name="hourglass")
-# sess.run(tf.global_variables_initializer())
-# sess.run(tf.local_variables_initializer())
-# saver = tf.train.Saver()
-# print('reee')
-# tf.reset_default_graph()
 
-# path = tf.train.get_checkpoint_state('./models/chkpt')
-saver = tf.train.import_meta_graph('./models/chkpt.meta')
-# saver.restore(sess, path.mode.checkpointpath)
-saver.restore(sess, './models/chkpt')
-graph = tf.get_default_graph()
-# print('resotred')
-inpt = graph.get_tensor_by_name("input:0")
-labels = graph.get_tensor_by_name("labels:0")
-model = graph.get_tensor_by_name("hourglass:0")
-loss = graph.get_tensor_by_name("cross_entropy_loss:0")
-
+input, label, model, loss, _ = model.load_model()
 
 def predict(filepath, loadFile=False):
     #get the input
@@ -46,8 +28,8 @@ def predict(filepath, loadFile=False):
     # saver = tf.train.import_meta_graph('./models/chkpt.meta')
     # saver.restore(sess,tf.train.latest_checkpoint('./models/'))
     # print(type(image))
-    los2 = costTF(model, labels)
-    voxels, los, loss2 = sess.run([model, loss, los2], feed_dict = {inpt: [image], labels:[label_vox]})
+    los2 = costTF(model, label)
+    voxels, los, loss2 = sess.run([model, loss, los2], feed_dict = {input: [image], label:[label_vox]})
     voxels = voxels[0]
     # los = sess.run(loss, feed_dict = {inpt: [image], labels:[label_vox]})
     # los2 = sess.run(costTF(voxels, labels), feed_dict = {inpt: [image], labels:[label_vox]})

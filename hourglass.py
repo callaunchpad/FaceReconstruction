@@ -2,83 +2,63 @@ import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
 '''
-RESBLOCK BOIZ
+Residual Block from figure 3
+https://arxiv.org/pdf/1603.06937.pdf
 '''
-def resBlock(x,channels=256,kernel_size=[3,3], activation=tf.nn.leaky_relu):
-    result = tf.layers.conv2d(inputs=x, filters=channels/2, kernel_size=[1,1], activation=activation)
-    result = tf.layers.conv2d(inputs=result, filters=channels/2, kernel_size=kernel_size, activation=activation)
-    result = tf.layers.conv2d(inputs=result, filters=channels, kernel_size=[1,1], activation=activation)
-    result = slim.conv2d(x,channels/2,kernel_size,activation_fn=activation)
+def resBlock(x,channels=256,kernel_size=3, activation=tf.nn.leaky_relu):
+    result = tf.layers.conv2d(inputs=x, filters=channels/2, kernel_size=[1,1], activation=activation, padding="same")
+    result = tf.layers.conv2d(inputs=result, filters=channels/2, kernel_size=[kernel_size, kernel_size], activation=activation, padding="same")
+    result = tf.layers.conv2d(inputs=result, filters=channels, kernel_size=[1,1], activation=activation, padding="same")
     return x + result
 
 '''
-Our input layer is 200x200, and the smallest we get to is 4x4
 Input
-    layer_details: A list of tuples representing specifics about each convolutional layer, in the format
-                   (kernel_dim1, kernel_dim2, nfilters, padding, activation)
-    pool_details: A list of tuples representing specifics about each pooling layer, in the format
-                  (pool_dim1, pool_dim2, stride)
-    residual_module: A function that takes a layer and outputs its residual to be added
+    input_layer: A (batch_size, width, height, 3) tensor
+
+    layer_dims: A list of layer dimensions. This assumes that
+                the input and all slices of the hourglass are square
 Output
-    An untrained hourglass network
+    A (batch_size, width, heigh, nfilters) tensor representing the
+    output of the hourglass
 '''
 def get_hourglass(input_layer, layer_dims, output_size=200):
-    kernel_size = 4
+    kernel_size = 3
     nfilters = 256
     activation = tf.nn.leaky_relu
-    padding = "valid"
+    padding = "same"
     stride = 1
     residual_module = resBlock
 
-    #construct the first half of our downsampling convolutional layers, going off of layer_details and pool_details
-    conv_layers = [input_layer]
+    # Using 1x1 convolutions to raise the dimension. Original paper used 7x7 w/ pooling for dimensionality reduction
+    # We (probably) don't have the same constraints so this will suffice
+    input_layer = tf.layers.conv2d(inputs=input_layer, kernel_size=[1,1], filters=nfilters, padding=padding, activation=activation)
+
+
+    # Bottom up portion, downsizes by max pooling
+    residual_layers = []
+
     last_layer = input_layer
+    for i in range(len(layer_dims)):
+        target_dim = layer_dims[i]
 
-    for i in range(len(layer_dims) - 1):
-        target_dim = layer_dims[i+1]
+        residual_layer = residual_module(input_layer, channels=nfilters, kernel_size=kernel_size, activation=activation)
+        residual_layers.append(residual_layer)
 
-        new_conv_layer = tf.layers.conv2d(
-            inputs=last_layer,
-            filters=nfilters,
-            kernel_size=[kernel_size, kernel_size],
-            padding=padding,
-            activation=activation)
+        last_layer = tf.layers.conv2d(inputs=last_layer, filters=nfilters, kernel_size=[kernel_size, kernel_size], padding=padding, activation=activation)
+        pool_dim = last_layer.shape[1] - (target_dim - 1)
+        last_layer = tf.layers.max_pooling2d(inputs=last_layer, pool_size=[pool_dim, pool_dim], strides=stride)
 
-        conv_layers.append(new_conv_layer)
+    # Top down, upsampling with residual modules
+    while residual_layers:
+        residual_layer = residual_layers.pop()
+        target_dim = [residual_layer.shape[1], residual_layer.shape[2]]
+        upsample_layer = tf.image.resize_nearest_neighbor(images=last_layer, size=target_dim)
+        last_layer = tf.add(residual_layer, upsample_layer)
 
-        # (kernel_size - 1) from conv layer
-        pool_dim = layer_dims[i] - (kernel_size - 1) - (target_dim - 1)
+    # 2 final 1x1 layers at the end of the network
+    last_layer = tf.layers.conv2d(inputs=last_layer, filters=nfilters, kernel_size=[1,1], activation=activation)
+    last_layer = tf.layers.conv2d(inputs=last_layer, filters=output_size, kernel_size=[1,1], activation=activation)
 
-        new_pool = tf.layers.max_pooling2d(inputs=last_layer, pool_size=[pool_dim, pool_dim], strides=stride)
-
-        last_layer = new_pool
-
-    #upsample time!
-    for i in range(len(conv_layers) - 2):
-        #upsample by nearest neighbor
-        corresponding_layer = conv_layers[-(i+1)]
-
-        upsampled_size = corresponding_layer.shape[1:3]
-
-        new_upsample_layer = tf.image.resize_nearest_neighbor(last_layer, size=upsampled_size)
-        #add residual layer
-        residual_layer = residual_module(corresponding_layer)
-        print("upsamp", new_upsample_layer.shape)
-
-        last_layer = tf.add(new_upsample_layer, residual_layer)
-
-    corresponding_layer = conv_layers[0]
-    upsampled_size = corresponding_layer.shape[1:3]
-    last_layer = tf.image.resize_nearest_neighbor(last_layer, size=upsampled_size)
-
-    #finally, 200 1x1 convolutional layers and we're done
-    new_conv_layer = tf.layers.conv2d(
-        inputs=last_layer,
-        filters=output_size,
-        kernel_size=[1,1],
-        activation=None)
-    last_layer = new_conv_layer
-    #return our last layer, the output
     return last_layer
 
 #given an input size and output size, find the right kernel size for CNN
