@@ -44,7 +44,9 @@ def train_model(batch_size, iterations):
             feed_dict = {input: images, labels: voxels}
             try:
                 if err < 0.03:
-                    feed_dict[step_size] = 1e-6
+                    feed_dict[step_size] = 1e-4
+                    if err < 0.01:
+                        feed_dict[step_size] = 1e-5
                     train_step = gd_step
                 else:
                     train_step = adam_step
