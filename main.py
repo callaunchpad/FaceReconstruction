@@ -1,5 +1,9 @@
 from Inference import predict
+<<<<<<< HEAD
+from colorized_voxels_demo import visualize_voxels_original
+=======
 from colorized_voxels_demo import *
+>>>>>>> e69b5eab5901f417d9f978517229987b70ebb4ec
 from preprocess import processFile
 from PIL import Image
 import numpy as np
@@ -16,7 +20,9 @@ def pipeline(filePath):
     print(cropped.shape)
 
     #get voxels
-    voxels = predict(cropped,loadFile=True)
+    voxels = predict(cropped, loadFile=True)
+    #visualize
+    visualize_voxels_original(cropped, voxels)   
 
     import tensorflow as tf
     predicted = tf.placeholder(tf.float32, name="input", shape=(None, 200, 200, 200))
@@ -31,6 +37,7 @@ def pipeline(filePath):
 
     #visualize
     visualize_voxels_cropped(cropped, voxels)
+>>>>>>> e69b5eab5901f417d9f978517229987b70ebb4ec
 
 
 if __name__ == '__main__':
