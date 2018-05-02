@@ -26,9 +26,8 @@ def train_model(batch_size, iterations):
 
     saver = tf.train.Saver()
 
-    adam_step = tf.train.AdamOptimizer(1e-3).minimize(loss)
+    adam_step = tf.train.AdamOptimizer(1e-5).minimize(loss)
     images, voxels = get_batch(batch_size)
-    err = float('inf')
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         for i in range(iterations):
