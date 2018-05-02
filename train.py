@@ -14,7 +14,7 @@ def train_model(batch_size, iterations, load=True):
     hourglass_model = model.get_model(input, name='hourglass')
     cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(logits=hourglass_model, labels=labels)
     loss = tf.reduce_mean(cross_entropy, name= "cross_entropy_loss")
-    adam_step = tf.train.AdamOptimizer(1e-5, name="optimizer").minimize(loss)
+    adam_step = tf.train.AdamOptimizer(1e-3, name="optimizer").minimize(loss)
     saver = tf.train.Saver()
 
     #Overfit to only this batch for now
