@@ -37,15 +37,17 @@ def get_hourglass(features, layer_details, pool_details, residual_module, output
             kernel_size=[kernel_dim1, kernel_dim2],
             padding=padding,
             activation=activation)
+
+        conv_layers.append(new_conv_layer)
+
         new_pool = tf.layers.max_pooling2d(inputs=new_conv_layer, pool_size=[pool_dim1, pool_dim2], strides=stride)
 
-        conv_layers.append(new_pool)
         last_layer = new_pool
 
     #upsample time!
     for i in range(len(conv_layers) - 2):
         #upsample by nearest neighbor
-        corresponding_layer = conv_layers[-(i+2)]
+        corresponding_layer = conv_layers[-(i+1)]
 
         upsampled_size = corresponding_layer.shape[1:3]
 
