@@ -1,5 +1,6 @@
 from hourglass import *
 import tensorflow as tf
+import numpy as np
 from DataManager.manager import get_batch
 
 def get_model(input, name='hourglass'):
@@ -48,7 +49,13 @@ def train_model(batch_size, iterations):
                 continue
             if i % 5 == 0:
                 try:
-                    err = sess.run(loss, feed_dict=feed_dict)
+                    pred = sess.run(hourglass_model, feed_dict=feed_dict)
+                    ps = 1 / (1 + np.exp(-pred))
+                    err = -np.sum(voxels * np.ln(ps) + (1 - voxels) * np.ln(1-ps))
+                    pred = np.where(pred > 0, 1, 0)
+                    diff = pred - voxels
+                    diff = diff.reshape(-1)
+                    print("Accuracy: %f" % np.linalg.norm(diff, ord=1)/len(diff))
                     print("Loss: %i, %f " % (i, err))
                 except ValueError:
                     print("Random error calculating loss, don't know what's wrong. Just skipping this epoch.")
