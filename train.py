@@ -29,6 +29,8 @@ def train_model(batch_size, iterations):
 
     cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(logits=hourglass_model, labels=labels)
     loss = tf.reduce_mean(cross_entropy, name= 'cross_entropy_loss')
+    classified = (tf.sign(hourglass_model) + 1) / 2
+    accuracy = tf.reduce_mean(tf.abs(classified - labels))
 
     saver = tf.train.Saver()
 
@@ -49,14 +51,9 @@ def train_model(batch_size, iterations):
                 continue
             if i % 5 == 0:
                 try:
-                    pred = sess.run(hourglass_model, feed_dict=feed_dict)
-                    ps = 1 / (1 + np.exp(-pred))
-                    err = -np.sum(voxels * np.log(ps) + (1 - voxels) * np.log(1-ps))
-                    pred = np.where(pred > 0, 1, 0)
-                    diff = pred - voxels
-                    diff = diff.reshape(-1)
-                    print("Accuracy: %f" % (np.linalg.norm(diff, ord=1)/float(len(diff))))
+                    err, accuracy = sess.run([loss, accuracy], feed_dict=feed_dict)
                     print("Loss: %i, %f " % (i, err))
+                    print("Accuracy: %f" % accuracy)
                 except ValueError:
                     print("Random error calculating loss, don't know what's wrong. Just skipping this epoch.")
                     pass
