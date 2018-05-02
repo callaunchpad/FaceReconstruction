@@ -31,7 +31,8 @@ def train_model(batch_size, iterations):
 
     saver = tf.train.Saver()
 
-    first_optimizer = tf.train.AdamOptimizer(1e-3).minimize(loss)
+    # first_optimizer = tf.train.AdamOptimizer(1e-3).minimize(loss)
+    first_optimizer = tf.train.GradientDescentOptimizer(1e-5).minimize(loss)
     images, voxels = get_batch(batch_size)
 
     with tf.Session() as sess:
