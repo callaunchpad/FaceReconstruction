@@ -57,7 +57,7 @@ def get_hourglass(input_layer, layer_dims, output_size=200):
 
     # 2 final 1x1 layers at the end of the network
     last_layer = tf.layers.conv2d(inputs=last_layer, filters=nfilters, kernel_size=[1,1], activation=activation)
-    last_layer = tf.layers.conv2d(inputs=last_layer, filters=output_size, kernel_size=[1,1], activation=activation)
+    last_layer = tf.layers.conv2d(inputs=last_layer, filters=output_size, kernel_size=[1,1], activation=None)
 
     return last_layer
 
