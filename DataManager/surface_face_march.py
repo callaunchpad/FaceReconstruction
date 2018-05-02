@@ -10,6 +10,7 @@ Also demonstrates using the LinearLocator and custom formatting for the
 z axis tick labels.
 
 '''
+
 # from colorized_voxels_demo import subsample
 from mpl_toolkits.mplot3d import Axes3D
 # from manager import max_z
