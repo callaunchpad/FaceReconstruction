@@ -55,7 +55,7 @@ def train_model(batch_size, iterations):
                     pred = np.where(pred > 0, 1, 0)
                     diff = pred - voxels
                     diff = diff.reshape(-1)
-                    print("Accuracy: %f" % np.linalg.norm(diff, ord=1)/len(diff))
+                    print("Accuracy: %f" % (np.linalg.norm(diff, ord=1)/float(len(diff))))
                     print("Loss: %i, %f " % (i, err))
                 except ValueError:
                     print("Random error calculating loss, don't know what's wrong. Just skipping this epoch.")
