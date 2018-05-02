@@ -22,7 +22,7 @@ def train_model(batch_size, iterations, load=True):
 
     with tf.Session() as sess:
         if load:
-            input, labels, hourglass_model, loss = model.load_model()
+            input, labels, hourglass_model, loss = model.load_model(sess=sess)
             print("Successfully loaded saved file")
         else:
             sess.run(tf.global_variables_initializer())

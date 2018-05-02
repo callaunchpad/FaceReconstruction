@@ -48,7 +48,7 @@ Output: If save flag set, saves different views of the
 visualization in root. Otherwise, simply opens a window with
 the visualization from a side-front view.
 '''
-def visualize_voxels_cropped(cropped_image, voxels, save=False):
+def visualize_voxels_cropped(cropped_image, voxels, save=False, file_prefix="voxels"):
 	fig = plt.figure()
 	fig.subplots_adjust(top=1, bottom=0, left=0, right=1)
 
@@ -59,11 +59,12 @@ def visualize_voxels_cropped(cropped_image, voxels, save=False):
 	base_xs, base_ys, base_zs, base_colors = [], [], [], []
 	for x in range(0, 200, STRIDE):
 		for y in range(0, 200, STRIDE):
-			color = np.array(list(cropped_image.getpixel((x, y)))) / 255.0
+			# color = np.array(list(cropped_image.getpixel((x, y)))) / 255.0
+			color = (0,0,0)
 			base_xs.insert(0, x)
 			base_ys.insert(0, 200-y)
 			base_zs.insert(0, 0)
-			base_colors.insert(0, color)
+			base_colors.insert(0, (1,1,1))
 			for z in np.argwhere(voxels[x][y] == 1).T[0]:
 				xs.append(x)
 				ys.append(200-y)
@@ -71,26 +72,27 @@ def visualize_voxels_cropped(cropped_image, voxels, save=False):
 				colors.append(color)
 
 	# Shift z-coordinates of voxels to have 0 mean
-	avg_z = sum(zs) / float(len(zs))
+	avg_z = sum(zs) / float(len(zs)) if float(len(zs)) > 0 else 0
 	# Clip negative z-coordinates to 0
 	zs = [max(z - avg_z, 0) for z in zs]
 
 	xs = np.concatenate((base_xs, xs))
 	ys = np.concatenate((base_ys, ys))
 	zs = np.concatenate((base_zs, zs))
-	colors = np.concatenate((base_colors, colors))
+	colors = base_colors + colors
+	# colors = np.concatenate((base_colors, colors))
 
 	ax.scatter(xs=xs, ys=zs, zs=ys, color=colors, s=8)
 
 	if save:
 		ax.view_init(elev=0, azim=90)
-		plt.savefig("voxels_front.jpg")
+		plt.savefig(file_prefix + "_front.jpg")
 		ax.view_init(elev=25, azim=50)
-		plt.savefig("voxels_corner.jpg")
+		plt.savefig(file_prefix + "_corner.jpg")
 		ax.view_init(elev=0, azim=0)
-		plt.savefig("voxels_side.jpg")
+		plt.savefig(file_prefix + "_side.jpg")
 		ax.view_init(elev=0, azim=50)
-		plt.savefig("voxels_side_front.jpg")
+		plt.savefig(file_prefix + "_side_front.jpg")
 
 	else:
 		ax.view_init(elev=0, azim=50)
@@ -163,14 +165,14 @@ def visualize_voxels_original(image, voxels, transform, save=False):
 		bbox = fig.bbox_inches.from_bounds(0, 1, 5, 7)
 		bbox_front = fig.bbox_inches.from_bounds(0, 0, 8, 8)
 
-		ax.view_init(elev=0, azim=90)
-		plt.savefig("voxels_front.jpg")
+		# ax.view_init(elev=0, azim=90)
+		# plt.savefig("voxels_front.jpg")
 		ax.view_init(elev=20, azim=40)
 		plt.savefig("voxels_corner.jpg", bbox_inches=bbox)
 		ax.view_init(elev=0, azim=0)
 		plt.savefig("voxels_side.jpg", bbox_inches=bbox)
-		ax.view_init(elev=0, azim=40)
-		plt.savefig("voxels_side_front.jpg", bbox_inches=bbox)
+		# ax.view_init(elev=0, azim=40)
+		# plt.savefig("voxels_side_front.jpg", bbox_inches=bbox)
 	else:
 		ax.view_init(elev=20, azim=40)
 		plt.show()

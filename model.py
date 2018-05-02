@@ -24,5 +24,5 @@ def load_model(file_path="./models/chkpt", sess=None):
     labels = graph.get_tensor_by_name("labels:0")
     model = graph.get_tensor_by_name("hourglass:0")
     loss = graph.get_tensor_by_name("cross_entropy_loss:0")
-    optimizer = graph.get_tensor_by_name("optimizer")
+    optimizer = graph.get_operation_by_name("optimizer")
     return input, labels, model, loss, optimizer

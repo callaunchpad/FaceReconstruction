@@ -6,10 +6,11 @@ from DataManager.manager import convert_to_voxels
 import scipy
 from DataManager.surface_face_march import voxelToOBJ
 from DataManager.manager import get_batch
+from colorized_voxels_demo import visualize_voxels_cropped
 
 sess = tf.Session()
 
-input, label, model, loss, _ = model.load_model()
+input, label, model, loss, _ = model.load_model(sess=sess)
 
 def predict(filepath, loadFile=False):
     #get the input
@@ -18,47 +19,27 @@ def predict(filepath, loadFile=False):
     # else:
     #     image = np.array(Image.open(filepath))
 
-    crop, vox3 = get_batch(1)
+    crop, vox_label = get_batch(1)
     image = crop[0]
-    label_vox = vox3[0]
+    vox_label = vox_label[0]
 
-    # hourglass_model = get_model(input)
-    # #load our variables
-    # saver = tf.train.Saver()
-    # saver = tf.train.import_meta_graph('./models/chkpt.meta')
-    # saver.restore(sess,tf.train.latest_checkpoint('./models/'))
-    # print(type(image))
-    los2 = costTF(model, label)
-    voxels, los, loss2 = sess.run([model, loss, los2], feed_dict = {input: [image], label:[label_vox]})
+    voxels, err = sess.run([model, loss], feed_dict = {input: [image], label:[vox_label]})
     voxels = voxels[0]
-    # los = sess.run(loss, feed_dict = {inpt: [image], labels:[label_vox]})
-    # los2 = sess.run(costTF(voxels, labels), feed_dict = {inpt: [image], labels:[label_vox]})
-    print('loss is', los)
-    print('loss2 is', loss2)
-    print(np.min(voxels), np.mean(voxels), np.max(voxels))
-    print(np.sum(label_vox))
-    # print(np.sum(np.square(sigmoid(voxels) - label_vox)))
-    print("loss2 numpy", cost(voxels, label_vox))
-    print(voxels)
-    # return np.round(sigmoid(voxels))
-    return np.where(voxels > 0, 1, 0)
-    # return np.round(voxels)
 
+    # voxels = np.where(voxels > 0, 1, 0)
+    visualize_voxels_cropped(None, vox_label, save=True, file_prefix="images/True")
+    for i in range(7):
+        visualize_voxels_cropped(None, np.where(voxels > -i, 1, 0), save=True, file_prefix="images/" + str(i))
 
-def costTF(x, z):
-    temp = z * -1 * tf.log(tf.sigmoid(x)) + (z - 1) * tf.log(1 - tf.sigmoid(x))
-    loss = tf.reduce_mean(temp)
-    return loss
+    return voxels, err, vox_label
 
-def cost(x, z):
-    # log = np.log
-    # return z * -log(sigmoid(x)) + (1 - z) * -log(1 - sigmoid(x))
-    temp = z * -np.log(sigmoid(x)) + (1 - z) * -np.log(1 - sigmoid(x))
-    # temp = np.max(x, 0) - x * z + np.log(1 + np.exp(-np.abs(x)))
-    return np.sum(temp)
 
 sigmoid = lambda x: 1/(1+np.exp(-x))
 
-if __name__ == '__main__':
-    voxee = predict('')#./preprocessed/AFW/261068_2.jpg
-    voxelToOBJ(voxee, "output7")
+voxee, err, vox_label = predict('')
+
+
+# if __name__ == '__main__':
+#     voxee = predict('./preprocessed/AFW/261068_2.jpg')#./preprocessed/AFW/261068_2.jpg
+#     visualize_voxels_cropped(None, voxee, False)
+    # voxelToOBJ(voxee, "output7")
