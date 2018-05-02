@@ -6,7 +6,9 @@ preprocessed/
 hourglass_util/
 .idea/
 models/*
+model.zip
 
+output.log
 
 # General
 .DS_Store
