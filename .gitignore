@@ -6,6 +6,7 @@ preprocessed/
 hourglass_util/
 .idea/
 models/*
+images/*
 model.zip
 
 output.log
