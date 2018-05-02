@@ -49,7 +49,7 @@ def get_hourglass(input_layer, layer_dims, output_size=200):
         # (kernel_size - 1) from conv layer
         pool_dim = layer_dims[i] - (kernel_size - 1) - (target_dim - 1)
 
-        new_pool = tf.layers.max_pooling2d(inputs=new_conv_layer, pool_size=[pool_dim, pool_dim], strides=stride)
+        new_pool = tf.layers.max_pooling2d(inputs=last_layer, pool_size=[pool_dim, pool_dim], strides=stride)
 
         last_layer = new_pool
 
