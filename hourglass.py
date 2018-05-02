@@ -4,7 +4,7 @@ import tensorflow.contrib.slim as slim
 '''
 RESBLOCK BOIZ
 '''
-def resBlock(x,channels=3,kernel_size=[3,3],scale=1, activation=tf.nn.elu):
+def resBlock(x,channels=256,kernel_size=[3,3],scale=1, activation=tf.nn.elu):
     tmp = slim.conv2d(x,channels,kernel_size,activation_fn=None)
     tmp = activation(tmp)
     tmp = slim.conv2d(tmp,channels,kernel_size,activation_fn=None)
@@ -22,9 +22,10 @@ Input
 Output
     An untrained hourglass network
 '''
-def get_hourglass(features, layer_details, pool_details, residual_module):
+def get_hourglass(features, layer_details, pool_details, residual_module, output_size=200):
     #our input is 200x200, a regular 2D image
-    input_layer = tf.reshape(features, [-1, 200, 200, 3])
+    # input_layer = tf.reshape(features, [-1, 200, 200, 3])
+    input_layer = features
     #construct the first half of our downsampling convolutional layers, going off of layer_details and pool_details
     conv_layers = [input_layer]
     last_layer = input_layer
@@ -42,7 +43,7 @@ def get_hourglass(features, layer_details, pool_details, residual_module):
         last_layer = new_pool
 
     #upsample time!
-    for i in range(len(conv_layers) - 1):
+    for i in range(len(conv_layers) - 2):
         #upsample by nearest neighbor
         corresponding_layer = conv_layers[-(i+2)]
 
@@ -51,14 +52,18 @@ def get_hourglass(features, layer_details, pool_details, residual_module):
         new_upsample_layer = tf.image.resize_nearest_neighbor(last_layer, size=upsampled_size)
         #add residual layer
         residual_layer = residual_module(corresponding_layer)
+        print("upsamp", new_upsample_layer.shape)
 
         last_layer = tf.add(new_upsample_layer, residual_layer)
 
+    corresponding_layer = conv_layers[0]
+    upsampled_size = corresponding_layer.shape[1:3]
+    last_layer = tf.image.resize_nearest_neighbor(last_layer, size=upsampled_size)
 
     #finally, 200 1x1 convolutional layers and we're done
     new_conv_layer = tf.layers.conv2d(
         inputs=last_layer,
-        filters=200,
+        filters=output_size,
         kernel_size=[1,1],
         activation=None)
     last_layer = new_conv_layer
