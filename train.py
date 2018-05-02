@@ -9,12 +9,13 @@ import model
 def train_model(batch_size, iterations, load=True):
 
     # Create model
+    step_size = tf.placeholder(tf.float32, name="stepsize")
     input = tf.placeholder(tf.float32, name="input", shape=(None, 200, 200, 3))
     labels = tf.placeholder(tf.float32, name="labels", shape=(None, 200, 200, 200))
     hourglass_model = model.get_model(input, name='hourglass')
     cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(logits=hourglass_model, labels=labels)
     loss = tf.reduce_mean(cross_entropy, name= "cross_entropy_loss")
-    adam_step = tf.train.AdamOptimizer(1e-1, name="optimizer").minimize(loss)
+    adam_step = tf.train.AdamOptimizer(step_size, name="optimizer").minimize(loss)
     saver = tf.train.Saver()
 
     #Overfit to only this batch for now
@@ -22,7 +23,7 @@ def train_model(batch_size, iterations, load=True):
 
     with tf.Session() as sess:
         if load:
-            input, labels, hourglass_model, loss = model.load_model(sess=sess)
+            input, labels, hourglass_model, loss, step_size, adam_step = model.load_model(sess=sess)
             print("Successfully loaded saved file")
         else:
             sess.run(tf.global_variables_initializer())
@@ -30,7 +31,7 @@ def train_model(batch_size, iterations, load=True):
 
         for i in range(iterations):
             images, voxels = get_batch(batch_size)
-            feed_dict = {input: images, labels: voxels}
+            feed_dict = {input: images, labels: voxels, step_size: 1e-4}
 
             try:
                 train_step = adam_step
