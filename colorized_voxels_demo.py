@@ -59,18 +59,20 @@ def visualize_voxels_cropped(cropped_image, voxels, save=False):
 	base_xs, base_ys, base_zs, base_colors = [], [], [], []
 	for x in range(0, 200, STRIDE):
 		for y in range(0, 200, STRIDE):
-			# color = np.array(list(cropped_image.getpixel((x, y)))) / 255.0
+			color = np.array(list(cropped_image.getpixel((x, y)))) / 255.0
 			base_xs.insert(0, x)
 			base_ys.insert(0, 200-y)
 			base_zs.insert(0, 0)
-			# base_colors.insert(0, color)
+			base_colors.insert(0, color)
 			for z in np.argwhere(voxels[x][y] == 1).T[0]:
 				xs.append(x)
 				ys.append(200-y)
 				zs.append(z)
-				# colors.append(color)
+				colors.append(color)
 
+	# Shift z-coordinates of voxels to have 0 mean
 	avg_z = sum(zs) / float(len(zs))
+	# Clip negative z-coordinates to 0
 	zs = [max(z - avg_z, 0) for z in zs]
 
 	xs = np.concatenate((base_xs, xs))
@@ -126,7 +128,6 @@ def visualize_voxels_original(image, voxels, transform, save=False):
 	b = transform['b']
 
 	xs, ys, zs, colors = [], [], [], []
-	base_xs, base_ys, base_zs, base_colors = [], [], [], []
 	for x in range(0, 200, STRIDE):
 		for y in range(0, 200, STRIDE):
 			for z in np.argwhere(voxels[x][y] == 1).T[0]:
@@ -155,14 +156,15 @@ def visualize_voxels_original(image, voxels, transform, save=False):
 
 	ax.scatter(xs=xs, ys=zs, zs=ys, color=colors, s=5)
 	ax.set_ylim(0,100)
+	plt.axis('off')
 
 	if save:
 		# Used to crop whitespace
-		bbox = fig.bbox_inches.from_bounds(0, 0, 6, 8)
+		bbox = fig.bbox_inches.from_bounds(0, 1, 5, 7)
+		bbox_front = fig.bbox_inches.from_bounds(0, 0, 8, 8)
 
 		ax.view_init(elev=0, azim=90)
 		plt.savefig("voxels_front.jpg")
-
 		ax.view_init(elev=20, azim=40)
 		plt.savefig("voxels_corner.jpg", bbox_inches=bbox)
 		ax.view_init(elev=0, azim=0)
