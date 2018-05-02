@@ -22,9 +22,10 @@ Input
 Output
     An untrained hourglass network
 '''
-def get_hourglass(features, layer_details, pool_details, residual_module):
+def get_hourglass(features, layer_details, pool_details, residual_module, output_size=200):
     #our input is 200x200, a regular 2D image
-    input_layer = tf.reshape(features, [-1, 200, 200, 3])
+    # input_layer = tf.reshape(features, [-1, 200, 200, 3])
+    input_layer = features
     #construct the first half of our downsampling convolutional layers, going off of layer_details and pool_details
     conv_layers = [input_layer]
     last_layer = input_layer
@@ -62,7 +63,7 @@ def get_hourglass(features, layer_details, pool_details, residual_module):
     #finally, 200 1x1 convolutional layers and we're done
     new_conv_layer = tf.layers.conv2d(
         inputs=last_layer,
-        filters=200,
+        filters=output_size,
         kernel_size=[1,1],
         activation=None)
     last_layer = new_conv_layer

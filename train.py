@@ -3,7 +3,7 @@ import tensorflow as tf
 from DataManager.manager import get_batch
 
 def get_model(input, name='hourglass'):
-    layers = [(200, 200, 3), (125, 125, 3), (50, 50, 3), (4, 4, 3)]
+    layers = [(200, 200, 3), (150, 150, 3), (100, 100, 3), (50, 50, 3)]
     kernels = [(4, 4, 3), (4, 4, 3), (4, 4, 3)]
     filters = [256 for i in range(len(layers)-1)]
     padding = ["valid" for i in range(len(layers)-1)]
@@ -14,7 +14,8 @@ def get_model(input, name='hourglass'):
     residual_model = resBlock
     pool_details = [(73, 73, 1, 1), (73, 73, 1, 1), (44, 44, 1, 1)]
 
-    hourglass = get_hourglass(input, layer_details, pool_details, residual_model)
+    hourglass = get_hourglass(input, layer_details, pool_details, residual_model, output_size=256)
+    hourglass = get_hourglass(hourglass, layer_details, pool_details, residual_model, output_size=200)
     return tf.identity(hourglass, name=name)
 
 
