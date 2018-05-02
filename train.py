@@ -36,7 +36,7 @@ def train_model(batch_size, iterations, load=False):
             graph = tf.get_default_graph()
             input = graph.get_tensor_by_name("input:0")
             labels = graph.get_tensor_by_name("labels:0")
-            model = graph.get_tensor_by_name("hourglass:0")
+            hourglass_model = graph.get_tensor_by_name("hourglass:0")
             loss = graph.get_tensor_by_name("cross_entropy_loss:0")
 
         for i in range(iterations):
