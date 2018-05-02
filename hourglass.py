@@ -22,25 +22,34 @@ Input
 Output
     An untrained hourglass network
 '''
-def get_hourglass(features, layer_details, pool_details, residual_module, output_size=200):
-    #our input is 200x200, a regular 2D image
-    # input_layer = tf.reshape(features, [-1, 200, 200, 3])
-    input_layer = features
+def get_hourglass(input_layer, layer_dims, output_size=200):
+    kernel_size = 4
+    nfilters = 256
+    activation = tf.nn.leaky_relu
+    padding = "valid"
+    stride = 1
+    residual_module = resBlock
+
     #construct the first half of our downsampling convolutional layers, going off of layer_details and pool_details
     conv_layers = [input_layer]
     last_layer = input_layer
 
-    for (kernel_dim1, kernel_dim2, kernel_dim3, nfilters, padding, activation), (pool_dim1, pool_dim2, pool_dim3, stride) in zip(layer_details, pool_details):
+    for i in range(len(layer_dims) - 1):
+        target_dim = layer_dims[i+1]
+
         new_conv_layer = tf.layers.conv2d(
             inputs=last_layer,
             filters=nfilters,
-            kernel_size=[kernel_dim1, kernel_dim2],
+            kernel_size=[kernel_size, kernel_size],
             padding=padding,
             activation=activation)
 
         conv_layers.append(new_conv_layer)
 
-        new_pool = tf.layers.max_pooling2d(inputs=new_conv_layer, pool_size=[pool_dim1, pool_dim2], strides=stride)
+        # (kernel_size - 1) from conv layer
+        pool_dim = layer_dims[i] - (kernel_size - 1) - (target_dim - 1)
+
+        new_pool = tf.layers.max_pooling2d(inputs=new_conv_layer, pool_size=[pool_dim, pool_dim], strides=stride)
 
         last_layer = new_pool
 
