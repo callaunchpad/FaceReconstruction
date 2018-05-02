@@ -21,10 +21,9 @@ Output
     A (batch_size, width, heigh, nfilters) tensor representing the
     output of the hourglass
 '''
-def get_hourglass(input_layer, layer_dims, output_size=200):
+def get_hourglass(input_layer, layer_dims, output_size=200, activation=tf.nn.tanh):
     kernel_size = 3
     nfilters = 256
-    activation = tf.nn.leaky_relu
     padding = "same"
     stride = 1
     residual_module = resBlock
