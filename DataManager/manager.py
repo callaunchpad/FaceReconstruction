@@ -79,7 +79,7 @@ def get_batch(size, include_transforms=False):
         vox = convert_to_voxels(vert)
         image = np.array(Image.open(jpgs[index]))
 
-        print(jpgs[index])
+        # print(jpgs[index])
         vertices.append(vert)
         voxels.append(vox)
         images.append(image)
