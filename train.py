@@ -51,7 +51,7 @@ def train_model(batch_size, iterations):
                 try:
                     pred = sess.run(hourglass_model, feed_dict=feed_dict)
                     ps = 1 / (1 + np.exp(-pred))
-                    err = -np.sum(voxels * np.ln(ps) + (1 - voxels) * np.ln(1-ps))
+                    err = -np.sum(voxels * np.log(ps) + (1 - voxels) * np.log(1-ps))
                     pred = np.where(pred > 0, 1, 0)
                     diff = pred - voxels
                     diff = diff.reshape(-1)
