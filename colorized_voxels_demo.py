@@ -57,17 +57,17 @@ def visualize_voxels_cropped(cropped_image, voxels, save=False, file_prefix="vox
 
 	xs, ys, zs, colors = [], [], [], []
 	base_xs, base_ys, base_zs, base_colors = [], [], [], []
-	for x in range(0, 200, STRIDE):
-		for y in range(0, 200, STRIDE):
+	for x in range(0, 192, STRIDE):
+		for y in range(0, 192, STRIDE):
 			# color = np.array(list(cropped_image.getpixel((x, y)))) / 255.0
 			color = (0,0,0)
 			base_xs.insert(0, x)
-			base_ys.insert(0, 200-y)
+			base_ys.insert(0, 192-y)
 			base_zs.insert(0, 0)
 			base_colors.insert(0, (1,1,1))
 			for z in np.argwhere(voxels[x][y] == 1).T[0]:
 				xs.append(x)
-				ys.append(200-y)
+				ys.append(192-y)
 				zs.append(z)
 				colors.append(color)
 
@@ -130,8 +130,8 @@ def visualize_voxels_original(image, voxels, transform, save=False):
 	b = transform['b']
 
 	xs, ys, zs, colors = [], [], [], []
-	for x in range(0, 200, STRIDE):
-		for y in range(0, 200, STRIDE):
+	for x in range(0, 192, STRIDE):
+		for y in range(0, 192, STRIDE):
 			for z in np.argwhere(voxels[x][y] == 1).T[0]:
 				inv_coords = Ainv.dot(np.subtract(np.array([x, y, z]), b.T)[0])
 				xt, yt = int(inv_coords[0]), int(inv_coords[1])

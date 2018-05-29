@@ -1,17 +1,15 @@
-from hourglass import *
+# from hourglass import *
 import tensorflow as tf
 import numpy as np
 from DataManager.manager import get_batch
 import model
 
-
-
 def train_model(batch_size, iterations, load=True):
 
     # Create model
     step_size = tf.placeholder(tf.float32, name="stepsize")
-    input = tf.placeholder(tf.float32, name="input", shape=(None, 200, 200, 3))
-    labels = tf.placeholder(tf.float32, name="labels", shape=(None, 200, 200, 200))
+    input = tf.placeholder(tf.float32, name="input", shape=(None, 192, 192, 3))
+    labels = tf.placeholder(tf.float32, name="labels", shape=(None, 192, 192, 200))
     hourglass_model = model.get_model(input, name='hourglass')
     cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(logits=hourglass_model, labels=labels)
     loss = tf.reduce_mean(cross_entropy, name= "cross_entropy_loss")
@@ -19,7 +17,7 @@ def train_model(batch_size, iterations, load=True):
     saver = tf.train.Saver()
 
     #Overfit to only this batch for now
-    # images, voxels = get_batch(batch_size)
+    images, voxels = get_batch(batch_size)
 
     with tf.Session() as sess:
         if load:
@@ -30,7 +28,7 @@ def train_model(batch_size, iterations, load=True):
             print("Intialized model with random variables")
 
         for i in range(iterations):
-            images, voxels = get_batch(batch_size)
+            # images, voxels = get_batch(batch_size)
             feed_dict = {input: images, labels: voxels, step_size: 1e-4}
 
             try:

@@ -1,10 +1,10 @@
 import tensorflow as tf
 import numpy as np
 import model
-from PIL import Image
-from DataManager.manager import convert_to_voxels
-import scipy
-from DataManager.surface_face_march import voxelToOBJ
+# from PIL import Image
+# from DataManager.manager import convert_to_voxels
+# import scipy
+# from DataManager.surface_face_march import voxelToOBJ
 from DataManager.manager import get_batch
 from colorized_voxels_demo import visualize_voxels_cropped
 

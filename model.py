@@ -1,13 +1,11 @@
 import tensorflow as tf
 
-from hourglass import get_hourglass
+from hourglass2 import hourglass
 
 def get_model(input, name='hourglass'):
-    layer_dims = list(reversed(range(20, 200, 10)))
-
-    hourglass = get_hourglass(input, layer_dims, output_size=256)
-    hourglass = get_hourglass(hourglass, layer_dims, output_size=200)
-    return tf.identity(hourglass, name=name)
+    model = hourglass(input, 7, output_channels=256)
+    model = hourglass(model, 7, output_channels=200)
+    return tf.identity(model, name=name)
 
 def load_model(file_path="./models/chkpt", sess=None):
     '''
