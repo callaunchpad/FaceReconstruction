@@ -77,8 +77,9 @@ def get_batch(size, include_transforms=False):
         transform = scipy.io.loadmat(transforms[index])
         vert = data['3D-vertices']
         vox = convert_to_voxels(vert)
-        image = np.array(Image.open(jpgs[index]))
-
+        img = Image.open(jpgs[index])
+        img.thumbnail([192, 192])
+        image = np.array(img)
         # print(jpgs[index])
         vertices.append(vert)
         voxels.append(vox)
@@ -126,7 +127,7 @@ def get_visualization_batch(size):
         vert = data['3D-vertices']
         vox = convert_to_voxels(vert)
         img = Image.open(jpgs[index])
-        img.thumbnail(192, 192)
+        img.thumbnail([192, 192])
         image = np.array(img)
 
         vertices.append(vert)
