@@ -8,8 +8,8 @@ def train_model(batch_size, iterations, load=True):
 
     # Create model
     step_size = tf.placeholder(tf.float32, name="stepsize")
-    input = tf.placeholder(tf.float32, name="input", shape=(None, 192, 192, 3))
-    labels = tf.placeholder(tf.float32, name="labels", shape=(None, 192, 192, 200))
+    input = tf.placeholder(tf.float32, name="input", shape=(None, 200, 200, 3))
+    labels = tf.placeholder(tf.float32, name="labels", shape=(None, 200, 200, 200))
     hourglass_model = model.get_model(input, name='hourglass')
     cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(logits=hourglass_model, labels=labels)
     loss = tf.reduce_mean(cross_entropy, name= "cross_entropy_loss")
