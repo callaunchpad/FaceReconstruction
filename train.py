@@ -29,22 +29,23 @@ def train_model(batch_size, iterations, load=True):
 
         for i in range(iterations):
             # images, voxels = get_batch(batch_size)
-            feed_dict = {input: images, labels: voxels, step_size: 1e-4}
+            feed_dict = {input: images, labels: voxels, step_size: 10**(-iterations//1000+1)}
 
             try:
                 train_step = adam_step
                 err, _ = sess.run([loss, train_step], feed_dict=feed_dict)
-                print("Loss: %i, %f " % (i, err))
+                if i % 10 == 0:
+                    print("Loss: %i, %f " % (i, err))
             except ValueError as e:
                 print("Random error optimizing, don't know what's wrong. Just skipping this epoch.\n%s" % str(e))
                 continue
 
             #save our sess every 100 iterations
-            if (i % 10 == 0):
+            if (i % 20 == 0):
                 saver.save(sess, './models/chkpt')
 
     return hourglass_model
 
 if __name__ == "__main__":
     # model_path = "hourglass_util/"
-    train_model(batch_size=1, iterations=5000, load=False)
+    train_model(batch_size=10, iterations=5000, load=False)
