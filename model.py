@@ -3,8 +3,8 @@ import tensorflow as tf
 from hourglass2 import hourglass
 
 def get_model(input, name='hourglass'):
-    model = hourglass(input, 7, output_channels=256)
-    model = hourglass(model, 7, output_channels=200)
+    model = hourglass(input, 6, output_channels=256)
+    model = hourglass(model, 6, output_channels=200)
     return tf.identity(model, name=name)
 
 def load_model(file_path="./models/chkpt", sess=None):

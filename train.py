@@ -35,8 +35,8 @@ def train_model(batch_size, iterations, load=True):
                 train_step = adam_step
                 err, _ = sess.run([loss, train_step], feed_dict=feed_dict)
                 print("Loss: %i, %f " % (i, err))
-            except ValueError:
-                print("Random error optimizing, don't know what's wrong. Just skipping this epoch.")
+            except ValueError as e:
+                print("Random error optimizing, don't know what's wrong. Just skipping this epoch.\n%s" % str(e))
                 continue
 
             #save our sess every 100 iterations
@@ -47,4 +47,4 @@ def train_model(batch_size, iterations, load=True):
 
 if __name__ == "__main__":
     # model_path = "hourglass_util/"
-    train_model(batch_size=10, iterations=5000, load=False)
+    train_model(batch_size=1, iterations=5000, load=False)
